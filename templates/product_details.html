@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {{ product.name }} | ShopZone
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/product_details.css') }}">
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <header class="navbar">
+
+        <div class="logo">
+            🛒 ShopZone
+        </div>
+
+        <nav>
+
+            <a href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('products_page') }}">
+                Products
+            </a>
+
+            <a href="{{ url_for('home') }}#categories">
+                Categories
+            </a>
+
+            <a href="{{ url_for('cart') }}">
+                Cart 🛒
+            </a>
+
+            <a href="{{ url_for('login') }}"
+               class="login-btn">
+                Login
+            </a>
+
+        </nav>
+
+    </header>
+
+
+    <!-- PRODUCT DETAILS -->
+
+    <main class="container">
+
+        <a href="{{ url_for('products_page') }}"
+           class="back-button">
+
+            ← Back to Products
+
+        </a>
+
+
+        <section class="product-details">
+
+
+            <!-- PRODUCT IMAGE -->
+
+            <div class="product-image">
+
+                <span>
+                    {{ product.icon }}
+                </span>
+
+            </div>
+
+
+            <!-- INFORMATION -->
+
+            <div class="product-info">
+
+                <span class="category">
+                    {{ product.category }}
+                </span>
+
+
+                <h1>
+                    {{ product.name }}
+                </h1>
+
+
+                <div class="rating">
+                    ⭐ {{ product.rating }}
+                </div>
+
+
+                <h2 class="price">
+                    ₱{{ "{:,.0f}".format(product.price) }}
+                </h2>
+
+
+                <p class="description">
+                    {{ product.description }}
+                </p>
+
+
+                <!-- SPECIFICATIONS -->
+
+                <div class="specifications">
+
+                    <h3>
+                        Specifications
+                    </h3>
+
+
+                    <div class="spec">
+
+                        <span>
+                            RAM
+                        </span>
+
+                        <strong>
+                            {{ product.ram }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="spec">
+
+                        <span>
+                            Storage
+                        </span>
+
+                        <strong>
+                            {{ product.storage }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="spec">
+
+                        <span>
+                            Processor
+                        </span>
+
+                        <strong>
+                            {{ product.processor }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- QUANTITY -->
+
+                <div class="quantity">
+
+                    <span>
+                        Quantity
+                    </span>
+
+                    <div class="quantity-controls">
+
+                        <button
+                            type="button"
+                            onclick="decreaseQuantity()">
+                            −
+                        </button>
+
+                        <span id="quantity">
+                            1
+                        </span>
+
+                        <button
+                            type="button"
+                            onclick="increaseQuantity()">
+                            +
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CART BUTTON -->
+
+                <button
+                    type="button"
+                    class="cart-button"
+                    onclick="addToCart()">
+
+                    🛒 Add to Cart
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script
+        src="{{ url_for('static', filename='css/js/product_details.js') }}">
+    </script>
+
+</body>
+
+</html>

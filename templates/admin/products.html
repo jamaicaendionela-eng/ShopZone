@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Products | ShopZone</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/products.css') }}">
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <header class="navbar">
+
+        <div class="logo">
+            🛒 ShopZone
+        </div>
+
+        <nav>
+
+            <a href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('products_page') }}">
+                Products
+            </a>
+
+            <a href="{{ url_for('home') }}#categories">
+                Categories
+            </a>
+
+            <a href="{{ url_for('cart') }}">
+                Cart 🛒
+            </a>
+
+            <a href="{{ url_for('login') }}"
+               class="login-btn">
+                Login
+            </a>
+
+        </nav>
+
+    </header>
+
+
+    <!-- PAGE HEADER -->
+
+    <section class="page-header">
+
+        <span>
+            SHOPZONE STORE
+        </span>
+
+        <h1>
+            Our Products
+        </h1>
+
+        <p>
+            Find the products you need at student-friendly prices.
+        </p>
+
+    </section>
+
+
+    <!-- SEARCH -->
+
+    <section class="catalog">
+
+        <div class="search-area">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="🔎 Search products..."
+                oninput="searchProducts()"
+            >
+
+        </div>
+
+
+        <!-- CATEGORY FILTER -->
+
+        <div class="categories">
+
+            <button
+                type="button"
+                class="category-btn active"
+                onclick="filterProducts('all', this)">
+                All
+            </button>
+
+            <button
+                type="button"
+                class="category-btn"
+                onclick="filterProducts('Electronics', this)">
+                Electronics
+            </button>
+
+            <button
+                type="button"
+                class="category-btn"
+                onclick="filterProducts('Accessories', this)">
+                Accessories
+            </button>
+
+            <button
+                type="button"
+                class="category-btn"
+                onclick="filterProducts('School', this)">
+                School
+            </button>
+
+        </div>
+
+
+        <!-- PRODUCTS -->
+
+        <div class="products"
+             id="productContainer">
+
+            {% for product_id, product in products.items() %}
+
+            <div
+                class="product-card"
+                data-category="{{ product.category }}"
+                data-name="{{ product.name }}">
+
+                <div class="product-image">
+                    {{ product.icon }}
+                </div>
+
+                <div class="product-info">
+
+                    <small>
+                        {{ product.category }}
+                    </small>
+
+                    <h3>
+                        {{ product.name }}
+                    </h3>
+
+                    <div class="rating">
+                        ⭐ {{ product.rating }}
+                    </div>
+
+                    <p class="price">
+                        ₱{{ "{:,.0f}".format(product.price) }}
+                    </p>
+
+                    <div class="product-buttons">
+
+                        <a
+                            href="{{ url_for('product_details', product_id=product_id) }}"
+                            class="view-btn">
+                            View Details
+                        </a>
+
+                        <button
+                            type="button"
+                            onclick="addToCart('{{ product.name }}')">
+                            🛒 Add to Cart
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script
+        src="{{ url_for('static', filename='css/js/products.js') }}">
+    </script>
+
+</body>
+
+</html>

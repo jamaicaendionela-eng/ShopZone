@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Register | ShopZone</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/auth.css') }}">
+
+</head>
+
+<body>
+
+
+    <header class="auth-navbar">
+
+        <a href="{{ url_for('home') }}"
+           class="auth-logo">
+
+            🛒 ShopZone
+
+        </a>
+
+    </header>
+
+
+    <main class="auth-page">
+
+
+        <div class="auth-card">
+
+
+            <div class="auth-header">
+
+                <span>
+                    JOIN SHOPZONE
+                </span>
+
+                <h1>
+                    Create Account
+                </h1>
+
+                <p>
+                    Create your account and start shopping.
+                </p>
+
+            </div>
+
+
+            {% if error %}
+
+            <div class="error-message">
+                {{ error }}
+            </div>
+
+            {% endif %}
+
+
+            <form method="POST"
+                  action="{{ url_for('register') }}">
+
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="At least 6 characters"
+                        minlength="6"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="confirm_password">
+                        Confirm Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Confirm your password"
+                        minlength="6"
+                        required>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="auth-button">
+
+                    Create Account
+
+                </button>
+
+
+            </form>
+
+
+            <div class="auth-footer">
+
+                <p>
+                    Already have an account?
+                </p>
+
+                <a href="{{ url_for('login') }}">
+                    Login here
+                </a>
+
+            </div>
+
+
+            <a href="{{ url_for('home') }}"
+               class="back-home">
+
+                ← Back to Home
+
+            </a>
+
+
+        </div>
+
+
+    </main>
+
+</body>
+
+</html>
