@@ -2,17 +2,43 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Products | ShopZone</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/products.css') }}">
 
+    <style>
+        /* Cart notification */
+
+        .cart-link {
+            position: relative;
+        }
+
+        .cart-notification {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            width: 9px;
+            height: 9px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: block;
+        }
+
+        /* Add to cart feedback */
+
+        .add-cart-button {
+            position: relative;
+        }
+
+        .add-cart-button.added {
+            background: #16a34a;
+        }
+    </style>
 </head>
 
 <body>
@@ -39,14 +65,27 @@
                 Categories
             </a>
 
-            <a href="{{ url_for('cart') }}">
+            <a href="{{ url_for('cart') }}" class="cart-link">
                 Cart 🛒
+
+                {% if session.get('cart_notification') %}
+                    <span class="cart-notification"></span>
+                {% endif %}
             </a>
 
-            <a href="{{ url_for('login') }}"
-               class="login-btn">
-                Login
-            </a>
+            {% if session.get('user') %}
+
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}" class="login-btn">
+                    Login
+                </a>
+
+            {% endif %}
 
         </nav>
 
@@ -57,24 +96,22 @@
 
     <section class="page-header">
 
-        <span>
-            SHOPZONE STORE
-        </span>
-
         <h1>
             Our Products
         </h1>
 
         <p>
-            Find the products you need at student-friendly prices.
+            Find the technology and school essentials you need.
         </p>
 
     </section>
 
 
-    <!-- SEARCH -->
+    <!-- PRODUCT CATALOG -->
 
     <section class="catalog">
+
+        <!-- SEARCH -->
 
         <div class="search-area">
 
@@ -88,35 +125,35 @@
         </div>
 
 
-        <!-- CATEGORY FILTER -->
+        <!-- CATEGORIES -->
 
         <div class="categories">
 
             <button
-                type="button"
                 class="category-btn active"
-                onclick="filterProducts('all', this)">
+                onclick="filterProducts('all', this)"
+            >
                 All
             </button>
 
             <button
-                type="button"
                 class="category-btn"
-                onclick="filterProducts('Electronics', this)">
+                onclick="filterProducts('Electronics', this)"
+            >
                 Electronics
             </button>
 
             <button
-                type="button"
                 class="category-btn"
-                onclick="filterProducts('Accessories', this)">
+                onclick="filterProducts('Accessories', this)"
+            >
                 Accessories
             </button>
 
             <button
-                type="button"
                 class="category-btn"
-                onclick="filterProducts('School', this)">
+                onclick="filterProducts('School', this)"
+            >
                 School
             </button>
 
@@ -125,57 +162,72 @@
 
         <!-- PRODUCTS -->
 
-        <div class="products"
-             id="productContainer">
+        <div class="products" id="productContainer">
 
             {% for product_id, product in products.items() %}
 
-            <div
-                class="product-card"
-                data-category="{{ product.category }}"
-                data-name="{{ product.name }}">
+                <div
+                    class="product-card"
+                    data-category="{{ product.category }}"
+                    data-name="{{ product.name }}"
+                >
 
-                <div class="product-image">
-                    {{ product.icon }}
-                </div>
-
-                <div class="product-info">
-
-                    <small>
-                        {{ product.category }}
-                    </small>
-
-                    <h3>
-                        {{ product.name }}
-                    </h3>
-
-                    <div class="rating">
-                        ⭐ {{ product.rating }}
+                    <div class="product-image">
+                        {{ product.icon }}
                     </div>
 
-                    <p class="price">
-                        ₱{{ "{:,.0f}".format(product.price) }}
-                    </p>
 
-                    <div class="product-buttons">
+                    <div class="product-info">
 
-                        <a
-                            href="{{ url_for('product_details', product_id=product_id) }}"
-                            class="view-btn">
-                            View Details
-                        </a>
+                        <small>
+                            {{ product.category }}
+                        </small>
 
-                        <button
-                            type="button"
-                            onclick="addToCart('{{ product.name }}')">
-                            🛒 Add to Cart
-                        </button>
+                        <h3>
+                            {{ product.name }}
+                        </h3>
+
+                        <div class="rating">
+                            ⭐ {{ product.rating }}
+                        </div>
+
+                        <p class="price">
+                            ₱{{ "{:,.0f}".format(product.price) }}
+                        </p>
+
+
+                        <div class="product-buttons">
+
+                            <a
+                                href="{{ url_for('product_details', product_id=product_id) }}"
+                                class="view-btn"
+                            >
+                                View Details
+                            </a>
+
+
+                            <!-- ADD TO CART -->
+
+                            <form
+                                action="{{ url_for('add_to_cart', product_id=product_id) }}"
+                                method="POST"
+                                class="add-to-cart-form"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="add-cart-button"
+                                >
+                                    🛒 Add to Cart
+                                </button>
+
+                            </form>
+
+                        </div>
 
                     </div>
 
                 </div>
-
-            </div>
 
             {% endfor %}
 
@@ -184,9 +236,7 @@
     </section>
 
 
-    <script
-        src="{{ url_for('static', filename='js/products.js') }}">
-    </script>
+    <script src="{{ url_for('static', filename='css/js/products.js') }}"></script>
 
 </body>
 

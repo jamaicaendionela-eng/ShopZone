@@ -1,30 +1,483 @@
-<!-- templates/orders.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Orders | ShopZone</title>
+    <title>My Orders | ShopZone</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f6f8;
+            color: #222;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover {
+            color: #60a5fa;
+        }
+
+        .cart-link {
+            position: relative;
+        }
+
+        .cart-notification {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            width: 9px;
+            height: 9px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #111827;
+        }
+
+        .orders-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            font-size: 30px;
+            margin-bottom: 25px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .order-number {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .order-date {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 20px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .customer-info {
+            margin-top: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .customer-info h3 {
+            margin-bottom: 12px;
+        }
+
+        .customer-info p {
+            margin-bottom: 6px;
+            color: #4b5563;
+        }
+
+        .items-title {
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-name {
+            font-weight: bold;
+        }
+
+        .item-details {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .item-subtotal {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .order-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .payment-method {
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .order-total {
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+        .empty-orders {
+            background: white;
+            border-radius: 12px;
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .empty-orders h2 {
+            margin-bottom: 10px;
+        }
+
+        .empty-orders p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .shop-button {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 7px;
+            font-weight: bold;
+        }
+
+        .shop-button:hover {
+            background: #1d4ed8;
+        }
+
+        .back-cart {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 700px) {
+
+            .navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .order-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .order-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-item {
+                gap: 15px;
+            }
+
+        }
+
+    </style>
 
 </head>
 
 <body>
 
-    <h1>My Orders</h1>
+    <nav class="navbar">
 
-    <p>
-        Orders will be implemented after the database and
-        authentication system are added.
-    </p>
+        <div class="logo">
+            🛒 ShopZone
+        </div>
 
-    <a href="{{ url_for('home') }}">
-        Back to Home
-    </a>
+        <div class="nav-links">
+
+            <a href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('products_page') }}">
+                Products
+            </a>
+
+            <a
+                href="{{ url_for('cart') }}"
+                class="cart-link"
+            >
+                Cart 🛒
+
+                {% if session.get('cart_notification') %}
+                    <span class="cart-notification"></span>
+                {% endif %}
+            </a>
+
+            {% if session.get('user') %}
+
+                <a href="{{ url_for('logout') }}">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}">
+                    Login
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    <main class="orders-container">
+
+        <a
+            href="{{ url_for('cart') }}"
+            class="back-cart"
+        >
+            ← Back to Cart
+        </a>
+
+
+        <h1 class="page-title">
+            My Orders
+        </h1>
+
+
+        {% if error %}
+
+            <div class="error-box">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        {% if orders %}
+
+            {% for order in orders %}
+
+                <div class="order-card">
+
+                    <div class="order-header">
+
+                        <div>
+
+                            <div class="order-number">
+                                Order #{{ order.id }}
+                            </div>
+
+                            <div class="order-date">
+                                {{ order.created_at }}
+                            </div>
+
+                        </div>
+
+                        <div class="status">
+                            {{ order.status }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="customer-info">
+
+                        <h3>
+                            Delivery Information
+                        </h3>
+
+                        <p>
+                            <strong>Name:</strong>
+                            {{ order.full_name }}
+                        </p>
+
+                        <p>
+                            <strong>Email:</strong>
+                            {{ order.email }}
+                        </p>
+
+                        <p>
+                            <strong>Phone:</strong>
+                            {{ order.phone }}
+                        </p>
+
+                        <p>
+                            <strong>Address:</strong>
+                            {{ order.address }}
+                        </p>
+
+                    </div>
+
+
+                    <h3 class="items-title">
+                        Ordered Products
+                    </h3>
+
+
+                    {% for item in order["items"] %}
+
+                        <div class="order-item">
+
+                            <div>
+
+                                <div class="item-name">
+                                    {{ item.product_name }}
+                                </div>
+
+                                <div class="item-details">
+
+                                    ₱{{ "{:,.2f}".format(item.price) }}
+
+                                    ×
+
+                                    {{ item.quantity }}
+
+                                </div>
+
+                            </div>
+
+                            <div class="item-subtotal">
+
+                                ₱{{ "{:,.2f}".format(item.subtotal) }}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    <div class="order-footer">
+
+                        <div class="payment-method">
+
+                            Payment:
+
+                            <strong>
+                                {{ order.payment_method }}
+                            </strong>
+
+                        </div>
+
+                        <div class="order-total">
+
+                            Total:
+
+                            ₱{{ "{:,.2f}".format(order.total) }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <div class="empty-orders">
+
+                <h2>
+                    No Orders Yet
+                </h2>
+
+                <p>
+                    You haven't placed any orders yet.
+                </p>
+
+                <a
+                    href="{{ url_for('products_page') }}"
+                    class="shop-button"
+                >
+                    Start Shopping
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </main>
 
 </body>
 

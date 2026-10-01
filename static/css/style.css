@@ -517,45 +517,29 @@ footer p {
     }
 }
 
-/* =========================
-   CLICKABLE CARDS
-========================= */
+/* =========================================================
+   CART NOTIFICATION
+   ========================================================= */
 
-.category-card {
-    text-decoration: none;
-    color: inherit;
+.cart-link {
+    position: relative;
+}
+
+
+.cart-notification {
+    position: absolute;
+
+    top: -7px;
+    right: -8px;
+
+    width: 10px;
+    height: 10px;
+
+    background: #ef4444;
+
+    border-radius: 50%;
+
+    border: 2px solid white;
+
     display: block;
-}
-
-
-/* =========================
-   HOME PRODUCT BUTTON
-========================= */
-
-.home-product-btn {
-    display: inline-block;
-
-    width: 100%;
-
-    padding: 10px 15px;
-
-    border-radius: 7px;
-
-    background: #2563eb;
-
-    color: white;
-
-    text-decoration: none;
-
-    text-align: center;
-
-    font-size: 14px;
-
-    font-weight: bold;
-
-    transition: 0.3s;
-}
-
-.home-product-btn:hover {
-    background: #1d4ed8;
 }

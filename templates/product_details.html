@@ -2,19 +2,40 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>
-        {{ product.name }} | ShopZone
-    </title>
+    <title>{{ product.name }} | ShopZone</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/product_details.css') }}">
 
+    <style>
+        .cart-link {
+            position: relative;
+        }
+
+        .cart-notification {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            width: 9px;
+            height: 9px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: block;
+        }
+
+        .cart-button.added {
+            background: #16a34a;
+        }
+
+        .cart-button:disabled {
+            opacity: 0.8;
+            cursor: default;
+        }
+    </style>
 </head>
 
 <body>
@@ -41,34 +62,56 @@
                 Categories
             </a>
 
-            <a href="{{ url_for('cart') }}">
+            <a
+                href="{{ url_for('cart') }}"
+                class="cart-link"
+            >
                 Cart 🛒
+
+                {% if session.get('cart_notification') %}
+                    <span class="cart-notification"></span>
+                {% endif %}
+
             </a>
 
-            <a href="{{ url_for('login') }}"
-               class="login-btn">
-                Login
-            </a>
+            {% if session.get('user') %}
+
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="login-btn"
+                >
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a
+                    href="{{ url_for('login') }}"
+                    class="login-btn"
+                >
+                    Login
+                </a>
+
+            {% endif %}
 
         </nav>
 
     </header>
 
 
-    <!-- PRODUCT DETAILS -->
+    <!-- MAIN -->
 
     <main class="container">
 
-        <a href="{{ url_for('products_page') }}"
-           class="back-button">
-
+        <a
+            href="{{ url_for('products_page') }}"
+            class="back-button"
+        >
             ← Back to Products
-
         </a>
 
 
         <section class="product-details">
-
 
             <!-- PRODUCT IMAGE -->
 
@@ -81,7 +124,7 @@
             </div>
 
 
-            <!-- INFORMATION -->
+            <!-- PRODUCT INFORMATION -->
 
             <div class="product-info">
 
@@ -120,41 +163,20 @@
 
 
                     <div class="spec">
-
-                        <span>
-                            RAM
-                        </span>
-
-                        <strong>
-                            {{ product.ram }}
-                        </strong>
-
+                        <span>RAM</span>
+                        <strong>{{ product.ram }}</strong>
                     </div>
 
 
                     <div class="spec">
-
-                        <span>
-                            Storage
-                        </span>
-
-                        <strong>
-                            {{ product.storage }}
-                        </strong>
-
+                        <span>Storage</span>
+                        <strong>{{ product.storage }}</strong>
                     </div>
 
 
                     <div class="spec">
-
-                        <span>
-                            Processor
-                        </span>
-
-                        <strong>
-                            {{ product.processor }}
-                        </strong>
-
+                        <span>Processor</span>
+                        <strong>{{ product.processor }}</strong>
                     </div>
 
                 </div>
@@ -168,21 +190,26 @@
                         Quantity
                     </span>
 
+
                     <div class="quantity-controls">
 
                         <button
                             type="button"
-                            onclick="decreaseQuantity()">
+                            onclick="decreaseQuantity()"
+                        >
                             −
                         </button>
+
 
                         <span id="quantity">
                             1
                         </span>
 
+
                         <button
                             type="button"
-                            onclick="increaseQuantity()">
+                            onclick="increaseQuantity()"
+                        >
                             +
                         </button>
 
@@ -191,16 +218,31 @@
                 </div>
 
 
-                <!-- CART BUTTON -->
+                <!-- ADD TO CART -->
 
-                <button
-                    type="button"
-                    class="cart-button"
-                    onclick="addToCart()">
+                <form
+                    action="{{ url_for('add_to_cart', product_id=product_id) }}"
+                    method="POST"
+                    id="addToCartForm"
+                >
 
-                    🛒 Add to Cart
+                    <input
+                        type="hidden"
+                        id="quantityInput"
+                        name="quantity"
+                        value="1"
+                    >
 
-                </button>
+
+                    <button
+                        type="submit"
+                        class="cart-button"
+                        id="addCartButton"
+                    >
+                        🛒 Add to Cart
+                    </button>
+
+                </form>
 
             </div>
 
@@ -209,9 +251,7 @@
     </main>
 
 
-    <script
-        src="{{ url_for('static', filename='css/js/product_details.js') }}">
-    </script>
+    <script src="{{ url_for('static', filename='css/js/product_details.js') }}"></script>
 
 </body>
 
