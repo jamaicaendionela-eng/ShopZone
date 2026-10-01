@@ -968,6 +968,259 @@ def admin_products():
 
 
 # =========================================================
+# ADD ADMIN PRODUCT
+# =========================================================
+
+@app.route(
+    "/admin/products/add",
+    methods=["POST"]
+)
+def admin_add_product():
+
+    name = request.form.get(
+        "name",
+        ""
+    ).strip()
+
+    category = request.form.get(
+        "category",
+        ""
+    ).strip()
+
+    price = request.form.get(
+        "price",
+        ""
+    ).strip()
+
+    rating = request.form.get(
+        "rating",
+        "0"
+    ).strip()
+
+    icon = request.form.get(
+        "icon",
+        "🛍️"
+    ).strip()
+
+    description = request.form.get(
+        "description",
+        ""
+    ).strip()
+
+    ram = request.form.get(
+        "ram",
+        "N/A"
+    ).strip()
+
+    storage = request.form.get(
+        "storage",
+        "N/A"
+    ).strip()
+
+    processor = request.form.get(
+        "processor",
+        "N/A"
+    ).strip()
+
+    if not name or not category or not price:
+
+        return redirect(
+            url_for("admin_products")
+        )
+
+    try:
+
+        price = float(price)
+
+        rating = float(rating or 0)
+
+        if price < 0:
+            price = 0
+
+        if rating < 0:
+            rating = 0
+
+        if rating > 5:
+            rating = 5
+
+        product_data = {
+            "name": name,
+            "category": category,
+            "price": price,
+            "rating": rating,
+            "icon": icon or "🛍️",
+            "description": description,
+            "ram": ram or "N/A",
+            "storage": storage or "N/A",
+            "processor": processor or "N/A"
+        }
+
+        (
+            supabase
+            .table("products")
+            .insert(product_data)
+            .execute()
+        )
+
+    except Exception as e:
+
+        print(
+            "Admin add product error:",
+            e
+        )
+
+    return redirect(
+        url_for("admin_products")
+    )
+
+
+# =========================================================
+# EDIT ADMIN PRODUCT
+# =========================================================
+
+@app.route(
+    "/admin/products/<int:product_id>/edit",
+    methods=["POST"]
+)
+def admin_edit_product(product_id):
+
+    name = request.form.get(
+        "name",
+        ""
+    ).strip()
+
+    category = request.form.get(
+        "category",
+        ""
+    ).strip()
+
+    price = request.form.get(
+        "price",
+        ""
+    ).strip()
+
+    rating = request.form.get(
+        "rating",
+        "0"
+    ).strip()
+
+    icon = request.form.get(
+        "icon",
+        "🛍️"
+    ).strip()
+
+    description = request.form.get(
+        "description",
+        ""
+    ).strip()
+
+    ram = request.form.get(
+        "ram",
+        "N/A"
+    ).strip()
+
+    storage = request.form.get(
+        "storage",
+        "N/A"
+    ).strip()
+
+    processor = request.form.get(
+        "processor",
+        "N/A"
+    ).strip()
+
+    if not name or not category or not price:
+
+        return redirect(
+            url_for("admin_products")
+        )
+
+    try:
+
+        price = float(price)
+
+        rating = float(rating or 0)
+
+        if price < 0:
+            price = 0
+
+        if rating < 0:
+            rating = 0
+
+        if rating > 5:
+            rating = 5
+
+        product_data = {
+            "name": name,
+            "category": category,
+            "price": price,
+            "rating": rating,
+            "icon": icon or "🛍️",
+            "description": description,
+            "ram": ram or "N/A",
+            "storage": storage or "N/A",
+            "processor": processor or "N/A"
+        }
+
+        (
+            supabase
+            .table("products")
+            .update(product_data)
+            .eq(
+                "id",
+                product_id
+            )
+            .execute()
+        )
+
+    except Exception as e:
+
+        print(
+            "Admin edit product error:",
+            e
+        )
+
+    return redirect(
+        url_for("admin_products")
+    )
+
+
+# =========================================================
+# DELETE ADMIN PRODUCT
+# =========================================================
+
+@app.route(
+    "/admin/products/<int:product_id>/delete",
+    methods=["POST"]
+)
+def admin_delete_product(product_id):
+
+    try:
+
+        (
+            supabase
+            .table("products")
+            .delete()
+            .eq(
+                "id",
+                product_id
+            )
+            .execute()
+        )
+
+    except Exception as e:
+
+        print(
+            "Admin delete product error:",
+            e
+        )
+
+    return redirect(
+        url_for("admin_products")
+    )
+
+
+# =========================================================
 # ADMIN ORDERS
 # =========================================================
 
