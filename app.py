@@ -56,70 +56,85 @@ app.secret_key = os.getenv(
 
 
 # =========================================================
-# PRODUCT DATA
+# PRODUCT FUNCTIONS
 # =========================================================
 
-products = {
-    1: {
-        "name": "Programming Laptop",
-        "category": "Electronics",
-        "price": 24000,
-        "icon": "💻",
-        "rating": 4.8,
-        "description": (
-            "A reliable laptop for programming, school projects, "
-            "and everyday tasks."
-        ),
-        "ram": "16GB",
-        "storage": "512GB SSD",
-        "processor": "AMD Ryzen 5"
-    },
+def get_products():
+    """
+    Get all products from Supabase and convert them
+    into the same dictionary structure used by the
+    existing ShopZone templates.
+    """
 
-    2: {
-        "name": "Mechanical Keyboard",
-        "category": "Accessories",
-        "price": 1500,
-        "icon": "⌨️",
-        "rating": 4.7,
-        "description": (
-            "A mechanical keyboard suitable for programming "
-            "and everyday typing."
-        ),
-        "ram": "N/A",
-        "storage": "N/A",
-        "processor": "N/A"
-    },
+    try:
+        response = (
+            supabase
+            .table("products")
+            .select("*")
+            .order("id")
+            .execute()
+        )
 
-    3: {
-        "name": "Wireless Mouse",
-        "category": "Accessories",
-        "price": 800,
-        "icon": "🖱️",
-        "rating": 4.6,
-        "description": (
-            "A comfortable wireless mouse for students "
-            "and computer users."
-        ),
-        "ram": "N/A",
-        "storage": "N/A",
-        "processor": "N/A"
-    },
+        products = {}
 
-    4: {
-        "name": "Student Backpack",
-        "category": "School",
-        "price": 899,
-        "icon": "🎒",
-        "rating": 4.5,
-        "description": (
-            "A practical backpack suitable for students, "
-            "school supplies, and everyday use."
-        ),
-        "ram": "N/A",
-        "storage": "Multiple Compartments",
-        "processor": "N/A"
-    }
-}
+        for product in response.data or []:
+
+            product_id = product["id"]
+
+            products[product_id] = {
+                "name": product.get("name", ""),
+                "category": product.get("category", ""),
+                "price": float(product.get("price", 0)),
+                "icon": product.get("icon", "🛍️"),
+                "rating": float(product.get("rating", 0)),
+                "description": product.get("description", ""),
+                "ram": product.get("ram", "N/A"),
+                "storage": product.get("storage", "N/A"),
+                "processor": product.get("processor", "N/A")
+            }
+
+        return products
+
+    except Exception as e:
+        print("Products database error:", e)
+        return {}
+
+
+def get_product(product_id):
+    """
+    Get one product from Supabase.
+    """
+
+    try:
+        response = (
+            supabase
+            .table("products")
+            .select("*")
+            .eq("id", product_id)
+            .limit(1)
+            .execute()
+        )
+
+        if not response.data:
+            return None
+
+        product = response.data[0]
+
+        return {
+            "name": product.get("name", ""),
+            "category": product.get("category", ""),
+            "price": float(product.get("price", 0)),
+            "icon": product.get("icon", "🛍️"),
+            "rating": float(product.get("rating", 0)),
+            "description": product.get("description", ""),
+            "ram": product.get("ram", "N/A"),
+            "storage": product.get("storage", "N/A"),
+            "processor": product.get("processor", "N/A")
+        }
+
+    except Exception as e:
+        print("Product database error:", e)
+        return None
 
 
 # =========================================================
@@ -137,6 +152,9 @@ def home():
 
 @app.route("/products")
 def products_page():
+
+    products = get_products()
+
     return render_template(
         "products.html",
         products=products
@@ -149,7 +167,8 @@ def products_page():
 
 @app.route("/product/<int:product_id>")
 def product_details(product_id):
-    product = products.get(product_id)
+
+    product = get_product(product_id)
 
     if product is None:
         return "Product not found", 404
@@ -167,9 +186,11 @@ def product_details(product_id):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
     error = ""
 
     if request.method == "POST":
+
         email = request.form.get(
             "email",
             ""
@@ -181,6 +202,7 @@ def login():
         )
 
         if not email or not password:
+
             error = "Please fill in all required fields."
 
             return render_template(
@@ -189,6 +211,7 @@ def login():
             )
 
         try:
+
             response = (
                 supabase
                 .table("users")
@@ -205,9 +228,15 @@ def login():
             )
 
         except Exception as e:
-            print("Login database error:", e)
 
-            error = "Unable to connect to the database."
+            print(
+                "Login database error:",
+                e
+            )
+
+            error = (
+                "Unable to connect to the database."
+            )
 
             return render_template(
                 "login.html",
@@ -215,6 +244,7 @@ def login():
             )
 
         if user is None:
+
             error = "Invalid email or password."
 
             return render_template(
@@ -226,6 +256,7 @@ def login():
             user["password"],
             password
         ):
+
             error = "Invalid email or password."
 
             return render_template(
@@ -239,7 +270,9 @@ def login():
             "email": user["email"]
         }
 
-        return redirect(url_for("home"))
+        return redirect(
+            url_for("home")
+        )
 
     return render_template(
         "login.html",
@@ -253,9 +286,11 @@ def login():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+
     error = ""
 
     if request.method == "POST":
+
         name = request.form.get(
             "name",
             ""
@@ -282,7 +317,10 @@ def register():
             or not password
             or not confirm_password
         ):
-            error = "Please fill in all required fields."
+
+            error = (
+                "Please fill in all required fields."
+            )
 
             return render_template(
                 "register.html",
@@ -290,6 +328,7 @@ def register():
             )
 
         if password != confirm_password:
+
             error = "Passwords do not match."
 
             return render_template(
@@ -298,7 +337,10 @@ def register():
             )
 
         if len(password) < 6:
-            error = "Password must be at least 6 characters."
+
+            error = (
+                "Password must be at least 6 characters."
+            )
 
             return render_template(
                 "register.html",
@@ -306,6 +348,7 @@ def register():
             )
 
         try:
+
             existing_user = (
                 supabase
                 .table("users")
@@ -316,14 +359,19 @@ def register():
             )
 
             if existing_user.data:
-                error = "An account with this email already exists."
+
+                error = (
+                    "An account with this email already exists."
+                )
 
                 return render_template(
                     "register.html",
                     error=error
                 )
 
-            hashed_password = generate_password_hash(password)
+            hashed_password = (
+                generate_password_hash(password)
+            )
 
             supabase.table("users").insert({
                 "name": name,
@@ -332,7 +380,11 @@ def register():
             }).execute()
 
         except Exception as e:
-            print("Registration database error:", e)
+
+            print(
+                "Registration database error:",
+                e
+            )
 
             error = (
                 "Unable to create your account. "
@@ -344,7 +396,9 @@ def register():
                 error=error
             )
 
-        return redirect(url_for("login"))
+        return redirect(
+            url_for("login")
+        )
 
     return render_template(
         "register.html",
@@ -358,9 +412,15 @@ def register():
 
 @app.route("/logout")
 def logout():
-    session.pop("user", None)
 
-    return redirect(url_for("home"))
+    session.pop(
+        "user",
+        None
+    )
+
+    return redirect(
+        url_for("home")
+    )
 
 
 # =========================================================
@@ -369,8 +429,12 @@ def logout():
 
 @app.route("/cart")
 def cart():
-    # Remove the notification when Cart is opened.
-    session.pop("cart_notification", None)
+
+    # Remove notification when Cart is opened.
+    session.pop(
+        "cart_notification",
+        None
+    )
 
     cart_items = []
 
@@ -380,16 +444,22 @@ def cart():
     )
 
     for product_id, quantity in cart.items():
+
         product_id = int(product_id)
 
-        product = products.get(product_id)
+        product = get_product(
+            product_id
+        )
 
         if product:
+
             item = product.copy()
 
             item["id"] = product_id
             item["quantity"] = quantity
-            item["subtotal"] = product["price"] * quantity
+            item["subtotal"] = (
+                product["price"] * quantity
+            )
 
             cart_items.append(item)
 
@@ -420,17 +490,25 @@ def cart():
     methods=["POST"]
 )
 def add_to_cart(product_id):
-    if product_id not in products:
+
+    product = get_product(
+        product_id
+    )
+
+    if product is None:
         return "Product not found", 404
 
     try:
+
         quantity = int(
             request.form.get(
                 "quantity",
                 1
             )
         )
+
     except ValueError:
+
         quantity = 1
 
     if quantity < 1:
@@ -441,11 +519,16 @@ def add_to_cart(product_id):
         {}
     )
 
-    product_key = str(product_id)
+    product_key = str(
+        product_id
+    )
 
     if product_key in cart:
+
         cart[product_key] += quantity
+
     else:
+
         cart[product_key] = quantity
 
     session["cart"] = cart
@@ -455,7 +538,7 @@ def add_to_cart(product_id):
 
     session.modified = True
 
-    # Stay on the current page after adding the product.
+    # Stay on the current page.
     return redirect(
         request.referrer
         or url_for("products_page")
@@ -471,33 +554,43 @@ def add_to_cart(product_id):
     methods=["POST"]
 )
 def update_cart(product_id):
+
     cart = session.get(
         "cart",
         {}
     )
 
-    product_key = str(product_id)
+    product_key = str(
+        product_id
+    )
 
     try:
+
         quantity = int(
             request.form.get(
                 "quantity",
                 1
             )
         )
+
     except ValueError:
+
         quantity = 1
 
     if quantity < 1:
         quantity = 1
 
     if product_key in cart:
+
         cart[product_key] = quantity
 
     session["cart"] = cart
+
     session.modified = True
 
-    return redirect(url_for("cart"))
+    return redirect(
+        url_for("cart")
+    )
 
 
 # =========================================================
@@ -509,20 +602,27 @@ def update_cart(product_id):
     methods=["POST"]
 )
 def remove_from_cart(product_id):
+
     cart = session.get(
         "cart",
         {}
     )
 
-    product_key = str(product_id)
+    product_key = str(
+        product_id
+    )
 
     if product_key in cart:
+
         del cart[product_key]
 
     session["cart"] = cart
+
     session.modified = True
 
-    return redirect(url_for("cart"))
+    return redirect(
+        url_for("cart")
+    )
 
 
 # =========================================================
@@ -534,6 +634,7 @@ def remove_from_cart(product_id):
     methods=["GET", "POST"]
 )
 def checkout():
+
     cart_items = []
 
     cart = session.get(
@@ -541,18 +642,24 @@ def checkout():
         {}
     )
 
-    # Build cart items
+    # Build cart items.
     for product_id, quantity in cart.items():
+
         product_id = int(product_id)
 
-        product = products.get(product_id)
+        product = get_product(
+            product_id
+        )
 
         if product:
+
             item = product.copy()
 
             item["id"] = product_id
             item["quantity"] = quantity
-            item["subtotal"] = product["price"] * quantity
+            item["subtotal"] = (
+                product["price"] * quantity
+            )
 
             cart_items.append(item)
 
@@ -566,8 +673,9 @@ def checkout():
         for item in cart_items
     )
 
-    # Empty cart
+    # Empty cart.
     if not cart_items:
+
         return render_template(
             "checkout.html",
             cart_items=[],
@@ -576,8 +684,9 @@ def checkout():
             error="Your cart is empty."
         )
 
-    # Place order
+    # Place order.
     if request.method == "POST":
+
         full_name = request.form.get(
             "full_name",
             ""
@@ -610,7 +719,10 @@ def checkout():
             or not address
             or not payment_method
         ):
-            error = "Please fill in all required fields."
+
+            error = (
+                "Please fill in all required fields."
+            )
 
             return render_template(
                 "checkout.html",
@@ -623,10 +735,14 @@ def checkout():
         user_id = None
 
         if session.get("user"):
-            user_id = session["user"].get("id")
+
+            user_id = session[
+                "user"
+            ].get("id")
 
         try:
-            # Insert order
+
+            # Insert order.
             order_data = {
                 "user_id": user_id,
                 "full_name": full_name,
@@ -646,14 +762,21 @@ def checkout():
             )
 
             if not order_response.data:
-                raise Exception("Order was not created.")
 
-            order_id = order_response.data[0]["id"]
+                raise Exception(
+                    "Order was not created."
+                )
 
-            # Insert order items
+            order_id = (
+                order_response
+                .data[0]["id"]
+            )
+
+            # Insert order items.
             order_items = []
 
             for item in cart_items:
+
                 order_items.append({
                     "order_id": order_id,
                     "product_id": item["id"],
@@ -670,14 +793,22 @@ def checkout():
                 .execute()
             )
 
-            # Clear cart
-            session.pop("cart", None)
+            # Clear cart.
+            session.pop(
+                "cart",
+                None
+            )
 
-            session["last_order_id"] = order_id
+            session["last_order_id"] = (
+                order_id
+            )
 
-            return redirect(url_for("orders"))
+            return redirect(
+                url_for("orders")
+            )
 
         except Exception as e:
+
             print(
                 "Checkout database error:",
                 e
@@ -710,14 +841,20 @@ def checkout():
 
 @app.route("/orders")
 def orders():
+
     orders_list = []
+
     error = ""
 
     try:
-        user = session.get("user")
 
-        # Logged-in user
+        user = session.get(
+            "user"
+        )
+
+        # Logged-in user.
         if user:
+
             response = (
                 supabase
                 .table("orders")
@@ -733,11 +870,15 @@ def orders():
                 .execute()
             )
 
-        # Guest user
+        # Guest user.
         else:
-            last_order_id = session.get("last_order_id")
+
+            last_order_id = session.get(
+                "last_order_id"
+            )
 
             if last_order_id:
+
                 response = (
                     supabase
                     .table("orders")
@@ -749,12 +890,16 @@ def orders():
                     .limit(1)
                     .execute()
                 )
+
             else:
+
                 response = None
 
-        # Process orders
+        # Process orders.
         if response and response.data:
+
             for order in response.data:
+
                 items_response = (
                     supabase
                     .table("order_items")
@@ -772,9 +917,12 @@ def orders():
                     else []
                 )
 
-                orders_list.append(order)
+                orders_list.append(
+                    order
+                )
 
     except Exception as e:
+
         print(
             "Orders database error:",
             e
@@ -804,11 +952,18 @@ def admin_dashboard():
     )
 
 
+# =========================================================
+# ADMIN PRODUCTS
+# =========================================================
+
 @app.route("/admin/products")
 def admin_products():
 
+    products = get_products()
+
     return render_template(
-        "admin/products.html"
+        "admin/products.html",
+        products=products
     )
 
 
@@ -820,11 +975,12 @@ def admin_products():
 def admin_orders():
 
     orders_list = []
+
     error = ""
 
     try:
 
-        # Get all orders
+        # Get all orders.
         response = (
             supabase
             .table("orders")
@@ -836,8 +992,7 @@ def admin_orders():
             .execute()
         )
 
-
-        # Get order items
+        # Get order items.
         if response.data:
 
             for order in response.data:
@@ -853,18 +1008,15 @@ def admin_orders():
                     .execute()
                 )
 
-
                 order["items"] = (
                     items_response.data
                     if items_response.data
                     else []
                 )
 
-
                 orders_list.append(
                     order
                 )
-
 
     except Exception as e:
 
@@ -877,7 +1029,6 @@ def admin_orders():
             "Unable to load orders. "
             "Please try again."
         )
-
 
     return render_template(
         "admin/orders.html",
@@ -901,7 +1052,6 @@ def update_order_status(order_id):
         ""
     ).strip()
 
-
     allowed_statuses = [
         "Pending",
         "Processing",
@@ -910,27 +1060,26 @@ def update_order_status(order_id):
         "Cancelled"
     ]
 
-
     if status not in allowed_statuses:
 
         return redirect(
             url_for("admin_orders")
         )
 
-
     try:
 
-        supabase \
-            .table("orders") \
+        (
+            supabase
+            .table("orders")
             .update({
                 "status": status
-            }) \
+            })
             .eq(
                 "id",
                 order_id
-            ) \
+            )
             .execute()
-
+        )
 
     except Exception as e:
 
@@ -939,16 +1088,17 @@ def update_order_status(order_id):
             e
         )
 
-
     return redirect(
         url_for("admin_orders")
     )
+
 
 # =========================================================
 # RUN APPLICATION
 # =========================================================
 
 if __name__ == "__main__":
+
     app.run(
         debug=True
     )
