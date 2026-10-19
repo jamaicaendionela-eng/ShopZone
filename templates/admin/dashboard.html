@@ -1,30 +1,723 @@
-<!-- templates/admin/dashboard.html -->
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | ShopZone</title>
 
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: #fff;
+            padding: 18px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 35px 25px 60px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .page-header p,
+        .sales-description {
+            color: #6b7280;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            min-width: 0;
+        }
+
+        .stat-icon {
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card h3 {
+            font-size: 15px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .number {
+            font-size: 26px;
+            font-weight: bold;
+            color: #111827;
+            overflow-wrap: anywhere;
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            min-width: 0;
+        }
+
+        .section-title {
+            font-size: 21px;
+            margin-bottom: 20px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .status-summary {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .status-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            min-width: 0;
+        }
+
+        .status-card-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+        }
+
+        .status-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .status-count {
+            font-size: 28px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        /* SALES OVERVIEW */
+
+        .sales-overview {
+            width: 100%;
+            overflow: hidden;
+            padding-bottom: 32px;
+        }
+
+        .sales-overview .section-title {
+            margin-bottom: 5px;
+        }
+
+        .sales-description {
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .sales-chart-container {
+            width: 100%;
+            overflow-x: auto;
+            padding: 20px 18px 16px;
+            margin: 0 0 24px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .sales-chart {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-around;
+            gap: 16px;
+            min-width: 500px;
+            height: 220px;
+        }
+
+        .sales-bar-item {
+            flex: 1 1 0;
+            min-width: 45px;
+            max-width: 110px;
+            height: 100%;
+            display: grid;
+            grid-template-rows: 24px minmax(0, 1fr) 20px;
+            justify-items: center;
+            align-items: end;
+            gap: 5px;
+        }
+
+        .sales-bar-value {
+            width: 100%;
+            align-self: center;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap;
+        }
+
+        .sales-bar-track {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        .sales-bar {
+            display: block;
+            width: 65%;
+            min-height: 4px;
+            background: #2563eb;
+            border-radius: 5px 5px 0 0;
+            transition: height 0.2s ease;
+        }
+
+        .sales-bar-label {
+            align-self: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap;
+        }
+
+        .sales-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 0;
+        }
+
+        .sales-table {
+            width: 100%;
+            min-width: 460px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .sales-table th,
+        .sales-table td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .sales-table th {
+            background: #f9fafb;
+            color: #4b5563;
+            font-weight: 600;
+        }
+
+        .sales-table th:nth-child(1),
+        .sales-table td:nth-child(1) {
+            width: 25%;
+        }
+
+        .sales-table th:nth-child(2),
+        .sales-table td:nth-child(2) {
+            width: 40%;
+        }
+
+        .sales-table th:nth-child(3),
+        .sales-table td:nth-child(3) {
+            width: 35%;
+        }
+
+        .sales-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .sales-total {
+            display: block;
+            margin-top: 20px;
+            padding: 4px 0 8px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .sales-total strong {
+            color: #2563eb;
+        }
+
+        /* RECENT ORDERS */
+
+        .orders-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .orders-table th {
+            background: #f9fafb;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .orders-table td {
+            font-size: 14px;
+        }
+
+        .orders-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .order-total {
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-shipped {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .status-delivered {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        .view-all {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1000px) {
+            .status-summary {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 18px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .status-summary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .container {
+                padding: 25px 15px 50px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .page-header h1 {
+                font-size: 26px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid,
+            .status-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                gap: 12px;
+                font-size: 14px;
+            }
+
+            .sales-chart {
+                gap: 10px;
+                min-width: 470px;
+            }
+
+            .sales-bar-value {
+                font-size: 10px;
+            }
+
+            .sales-overview {
+                padding: 18px 14px 28px;
+            }
+
+            .sales-table th,
+            .sales-table td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .orders-table th,
+            .orders-table td {
+                padding: 10px 8px;
+                white-space: nowrap;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <header class="navbar">
+        <div class="logo">🛒 ShopZone Admin</div>
 
-    <h1>ShopZone Admin Dashboard</h1>
+        <nav class="nav-links">
+            <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('admin_products') }}">Products</a>
+            <a href="{{ url_for('admin_orders') }}">Orders</a>
+            <a href="{{ url_for('home') }}">Store</a>
+        </nav>
+    </header>
 
-    <p>
-        The admin dashboard will be implemented in a later step.
-    </p>
+    <main class="container">
+        <section class="page-header">
+            <h1>Admin Dashboard</h1>
+            <p>Overview of your ShopZone store.</p>
+        </section>
 
-    <a href="{{ url_for('home') }}">
-        Back to ShopZone
-    </a>
+        <!-- STATISTICS -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <h3>Total Products</h3>
+                <div class="number">{{ total_products }}</div>
+            </div>
 
+            <div class="stat-card">
+                <div class="stat-icon">🧾</div>
+                <h3>Total Orders</h3>
+                <div class="number">{{ total_orders }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <h3>Pending Orders</h3>
+                <div class="number">{{ pending_orders }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <h3>Total Sales</h3>
+                <div class="number">₱{{ "{:,.2f}".format(total_sales) }}</div>
+            </div>
+        </section>
+
+        <!-- QUICK ACTIONS -->
+        <section class="section">
+            <h2 class="section-title">Quick Actions</h2>
+
+            <div class="actions">
+                <a href="{{ url_for('admin_products') }}" class="action-btn">
+                    📦 Manage Products
+                </a>
+
+                <a href="{{ url_for('admin_orders') }}" class="action-btn">
+                    🧾 Manage Orders
+                </a>
+
+                <a href="{{ url_for('home') }}" class="action-btn">
+                    🛒 View Store
+                </a>
+            </div>
+        </section>
+
+        <!-- ORDER STATUS SUMMARY -->
+        <section class="section">
+            <h2 class="section-title">Order Status Summary</h2>
+
+            <div class="status-summary">
+                <div class="status-card">
+                    <div class="status-card-top">
+                        <div class="status-icon">🟡</div>
+                        <div class="status-name">Pending</div>
+                    </div>
+                    <div class="status-count">{{ pending_orders }}</div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-top">
+                        <div class="status-icon">🔵</div>
+                        <div class="status-name">Processing</div>
+                    </div>
+                    <div class="status-count">{{ processing_orders }}</div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-top">
+                        <div class="status-icon">🟣</div>
+                        <div class="status-name">Shipped</div>
+                    </div>
+                    <div class="status-count">{{ shipped_orders }}</div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-top">
+                        <div class="status-icon">🟢</div>
+                        <div class="status-name">Delivered</div>
+                    </div>
+                    <div class="status-count">{{ delivered_orders }}</div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-card-top">
+                        <div class="status-icon">🔴</div>
+                        <div class="status-name">Cancelled</div>
+                    </div>
+                    <div class="status-count">{{ cancelled_orders }}</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SALES OVERVIEW -->
+        <section class="section sales-overview">
+            <h2 class="section-title">Sales Overview</h2>
+            <p class="sales-description">Sales recorded for each order.</p>
+
+            {% if sales_data %}
+                {% set max_sale = namespace(value=1) %}
+
+                {% for sale in sales_data[:10] %}
+                    {% if sale.total > max_sale.value %}
+                        {% set max_sale.value = sale.total %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="sales-chart-container">
+                    <div
+                        class="sales-chart"
+                        role="img"
+                        aria-label="Bar chart showing sales amount for each order"
+                    >
+                        {% for sale in sales_data[:10] %}
+                            <div class="sales-bar-item">
+                                <span class="sales-bar-value">
+                                    ₱{{ "{:,.0f}".format(sale.total) }}
+                                </span>
+
+                                <div class="sales-bar-track">
+                                    <div
+                                        class="sales-bar"
+                                        style="height: {{ (sale.total / max_sale.value * 100)|round(2) }}%;"
+                                    ></div>
+                                </div>
+
+                                <span class="sales-bar-label">
+                                    #{{ sale.order_id }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="sales-table-wrapper">
+                    <table class="sales-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Order Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for sale in sales_data[:10] %}
+                                <tr>
+                                    <td><strong>#{{ sale.order_id }}</strong></td>
+                                    <td>{{ sale.date }}</td>
+                                    <td><strong>₱{{ "{:,.2f}".format(sale.total) }}</strong></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="sales-total">
+                    Total recorded sales:
+                    <strong>₱{{ "{:,.2f}".format(total_sales) }}</strong>
+                </p>
+            {% else %}
+                <div class="no-orders">No sales data available yet.</div>
+            {% endif %}
+        </section>
+
+        <!-- RECENT ORDERS -->
+        <section class="section">
+            <h2 class="section-title">Recent Orders</h2>
+
+            {% if recent_orders %}
+                <div class="orders-table-wrapper">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for order in recent_orders %}
+                                <tr>
+                                    <td class="order-id">#{{ order.id }}</td>
+                                    <td>{{ order.full_name }}</td>
+                                    <td class="order-total">
+                                        ₱{{ "{:,.2f}".format(order.total) }}
+                                    </td>
+                                    <td>
+                                        <span class="status status-{{ order.status|lower }}">
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.created_at }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <a href="{{ url_for('admin_orders') }}" class="view-all">
+                    View All Orders →
+                </a>
+            {% else %}
+                <div class="no-orders">No orders found.</div>
+            {% endif %}
+        </section>
+    </main>
 </body>
-
 </html>

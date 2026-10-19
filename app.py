@@ -939,16 +939,105 @@ def orders():
         error=error
     )
 
-
+#
 # =========================================================
-# ADMIN
+# ADMIN DASHBOARD
 # =========================================================
 
 @app.route("/admin")
 def admin_dashboard():
 
+    total_products = 0
+    total_orders = 0
+
+    pending_orders = 0
+    processing_orders = 0
+    shipped_orders = 0
+    delivered_orders = 0
+    cancelled_orders = 0
+
+    total_sales = 0.0
+    recent_orders = []
+    sales_data = []
+
+    try:
+
+        # GET PRODUCTS
+        products_response = (
+            supabase
+            .table("products")
+            .select("id")
+            .execute()
+        )
+
+        products = products_response.data or []
+        total_products = len(products)
+
+        # GET ALL ORDERS
+        orders_response = (
+            supabase
+            .table("orders")
+            .select(
+                "id, full_name, total, status, created_at"
+            )
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        orders_data = orders_response.data or []
+        total_orders = len(orders_data)
+
+        # CALCULATE STATISTICS AND SALES DATA
+        for order in orders_data:
+
+            status = order.get("status", "")
+
+            if status == "Pending":
+                pending_orders += 1
+            elif status == "Processing":
+                processing_orders += 1
+            elif status == "Shipped":
+                shipped_orders += 1
+            elif status == "Delivered":
+                delivered_orders += 1
+            elif status == "Cancelled":
+                cancelled_orders += 1
+
+            # Calculate total recorded order amounts
+            try:
+                order_total = float(order.get("total") or 0)
+            except (TypeError, ValueError):
+                order_total = 0.0
+
+            total_sales += order_total
+
+            # Add order to Sales Overview
+            created_at = order.get("created_at") or ""
+
+            sales_data.append({
+                "order_id": order.get("id"),
+                "date": created_at[:10] if created_at else "N/A",
+                "total": order_total
+            })
+
+        # Latest five orders
+        recent_orders = orders_data[:5]
+
+    except Exception as e:
+        print("Admin dashboard database error:", e)
+
     return render_template(
-        "admin/dashboard.html"
+        "admin/dashboard.html",
+        total_products=total_products,
+        total_orders=total_orders,
+        pending_orders=pending_orders,
+        processing_orders=processing_orders,
+        shipped_orders=shipped_orders,
+        delivered_orders=delivered_orders,
+        cancelled_orders=cancelled_orders,
+        total_sales=total_sales,
+        recent_orders=recent_orders,
+        sales_data=sales_data
     )
 
 
