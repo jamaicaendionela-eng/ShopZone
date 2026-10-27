@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Budget Planner | ShopZone</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/budget_planner.css') }}"
+    >
+
+    <style>
+        /* SHOPZONE NAVBAR */
+
+        .navbar {
+            background: #ffffff;
+            padding: 18px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2563eb;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .navbar nav {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .navbar nav a {
+            position: relative;
+            text-decoration: none;
+            color: #374151;
+            padding: 9px 12px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .navbar nav a:hover {
+            color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .navbar nav a.active {
+            color: #2563eb;
+            background: #eff6ff;
+            font-weight: 700;
+        }
+
+        .navbar nav .cart-link {
+            position: relative;
+        }
+
+        .navbar nav .cart-notification {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 9px;
+            height: 9px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+        }
+
+        .navbar nav a.login-btn {
+            background: #2563eb;
+            color: #ffffff;
+            padding: 10px 16px;
+        }
+
+        .navbar nav a.login-btn:hover {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        @media (max-width: 900px) {
+            .navbar {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .navbar nav {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .navbar {
+                padding: 14px 10px;
+            }
+
+            .navbar nav {
+                gap: 4px;
+            }
+
+            .navbar nav a {
+                padding: 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SHOPZONE NAVBAR -->
+
+    <header class="navbar">
+
+        <a href="{{ url_for('home') }}" class="logo">
+            🛒 ShopZone
+        </a>
+
+        <nav>
+
+            <a href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('products_page') }}">
+                Products
+            </a>
+
+            <a href="{{ url_for('home') }}#categories">
+                Categories
+            </a>
+
+            <a
+                href="{{ url_for('budget_planner') }}"
+                class="active"
+                aria-current="page"
+            >
+                Budget Planner
+            </a>
+
+            <a href="{{ url_for('cart') }}" class="cart-link">
+                Cart 🛒
+
+                {% if session.get('cart_notification') %}
+                    <span class="cart-notification"></span>
+                {% endif %}
+            </a>
+
+            {% if session.get('user') %}
+
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}" class="login-btn">
+                    Login
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="planner-container">
+
+        <section class="page-heading">
+            <span class="eyebrow">SMART SHOPPING TOOL</span>
+
+            <h1>Advanced Budget Planner</h1>
+
+            <p>
+                Plan your purchases, compare prices, and stay within your budget.
+            </p>
+        </section>
+
+
+        <!-- BUDGET SUMMARY -->
+
+        <section class="budget-panel">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Set Your Budget</h2>
+                    <p>How much are you planning to spend?</p>
+                </div>
+            </div>
+
+            <label for="budgetInput">Your total budget (₱)</label>
+
+            <div class="budget-input-group">
+
+                <span>₱</span>
+
+                <input
+                    type="number"
+                    id="budgetInput"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 30000"
+                >
+
+                <button type="button" id="setBudgetButton">
+                    Set Budget
+                </button>
+
+            </div>
+
+            <p id="budgetMessage" class="message" aria-live="polite"></p>
+
+            <div class="summary-grid">
+
+                <article class="summary-card">
+                    <span>Total Budget</span>
+                    <strong id="totalBudget">₱0.00</strong>
+                </article>
+
+                <article class="summary-card">
+                    <span>Total Expenses</span>
+                    <strong id="totalExpenses">₱0.00</strong>
+                </article>
+
+                <article class="summary-card">
+                    <span>Remaining Balance</span>
+                    <strong id="remainingBalance">₱0.00</strong>
+                </article>
+
+            </div>
+
+            <div class="progress-section">
+
+                <div class="progress-label">
+                    <span>Budget Usage</span>
+                    <strong id="budgetPercentage">0%</strong>
+                </div>
+
+                <div
+                    class="progress-track"
+                    id="progressTrack"
+                    role="progressbar"
+                    aria-label="Budget usage"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0"
+                >
+                    <div
+                        class="progress-fill"
+                        id="budgetProgress"
+                    ></div>
+                </div>
+
+                <p
+                    id="budgetStatus"
+                    class="budget-status"
+                    aria-live="polite"
+                >
+                    Set a budget to begin.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- AVAILABLE PRODUCTS -->
+
+        <section class="products-panel">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Available Products</h2>
+                    <p>Select products to build your shopping list.</p>
+                </div>
+            </div>
+
+            <div class="product-filters">
+
+                <input
+                    type="search"
+                    id="productSearch"
+                    placeholder="Search products..."
+                    aria-label="Search products"
+                >
+
+                <select
+                    id="categoryFilter"
+                    aria-label="Filter by category"
+                >
+                    <option value="all">All Categories</option>
+
+                    {% for product_id, product in products.items() %}
+                        <option value="{{ product.category }}">
+                            {{ product.category }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+                <select
+                    id="priceFilter"
+                    aria-label="Filter by price"
+                >
+                    <option value="all">All Prices</option>
+                    <option value="budget">Within Budget</option>
+                </select>
+
+            </div>
+
+            <div class="product-grid" id="budgetProductGrid">
+
+                {% for product_id, product in products.items() %}
+
+                    <article
+                        class="budget-product-card"
+                        data-product-id="{{ product_id }}"
+                        data-name="{{ product.name }}"
+                        data-category="{{ product.category }}"
+                        data-price="{{ product.price }}"
+                        data-rating="{{ product.rating }}"
+                    >
+
+                        <div class="product-icon">
+                            {{ product.icon }}
+                        </div>
+
+                        <div class="product-card-content">
+
+                            <span class="product-category">
+                                {{ product.category }}
+                            </span>
+
+                            <h3>{{ product.name }}</h3>
+
+                            <p class="product-rating">
+                                ★ {{ product.rating }}
+                            </p>
+
+                            <p class="product-price">
+                                ₱{{ "%.2f"|format(product.price) }}
+                            </p>
+
+                            <button
+                                type="button"
+                                class="add-budget-product"
+                                data-product-id="{{ product_id }}"
+                            >
+                                Add to Shopping List
+                            </button>
+
+                        </div>
+
+                    </article>
+
+                {% else %}
+
+                    <p class="empty-state">
+                        No products are currently available.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+
+            <p id="productCount" class="product-count"></p>
+
+        </section>
+
+
+        <!-- SHOPPING LIST -->
+
+        <section class="shopping-panel">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>My Shopping List</h2>
+                    <p>Adjust quantities or remove products at any time.</p>
+                </div>
+
+                <button
+                    type="button"
+                    id="clearShoppingList"
+                    class="secondary-button"
+                >
+                    Clear List
+                </button>
+
+            </div>
+
+            <div class="table-wrapper">
+
+                <table class="shopping-table">
+
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="shoppingListBody">
+
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                Your shopping list is empty.
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="shopping-footer">
+
+                <div>
+                    <span>Shopping List Total</span>
+                    <strong id="shoppingListTotal">₱0.00</strong>
+                </div>
+
+                <button
+                    type="button"
+                    id="compareAlternatives"
+                    class="secondary-button"
+                    disabled
+                >
+                    Compare Selected Products
+                </button>
+
+            </div>
+
+            <p
+                id="shoppingMessage"
+                class="message"
+                aria-live="polite"
+            ></p>
+
+        </section>
+
+
+        <!-- AFFORDABLE ALTERNATIVES -->
+
+        <section class="alternatives-panel">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Affordable Alternatives</h2>
+                    <p>
+                        Find lower-priced products that may help you save.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                id="alternativesContainer"
+                class="alternatives-container"
+            >
+                <p class="empty-state">
+                    Add a product to your shopping list to see alternatives.
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="planner-footer">
+        <p>ShopZone Budget Planner</p>
+    </footer>
+
+
+    <!-- BUDGET PLANNER JAVASCRIPT -->
+
+    <script
+        src="{{ url_for('static', filename='css/js/budget_planner.js') }}"
+        defer
+    ></script>
+
+</body>
+</html>

@@ -167,6 +167,19 @@ def products_page():
         products=products
     )
 
+# =========================================================
+# ADVANCED BUDGET PLANNER
+# =========================================================
+
+@app.route("/budget-planner")
+def budget_planner():
+
+    products = get_products()
+
+    return render_template(
+        "budget_planner.html",
+        products=products
+    )
 
 
 # =========================================================
