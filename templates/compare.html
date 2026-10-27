@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Compare Products | ShopZone</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/compare.css') }}">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a class="logo" href="{{ url_for('home') }}">🛒 ShopZone</a>
+
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('products_page') }}">Products</a>
+            <a href="{{ url_for('cart') }}">Cart 🛒</a>
+        </nav>
+    </header>
+
+    <main class="comparison-page">
+
+        <div class="page-heading">
+            <span>SMART PRODUCT COMPARISON</span>
+            <h1>Compare Products</h1>
+            <p>Compare specifications and prices to find the right product for you.</p>
+        </div>
+
+        <!-- Same Category Comparison Message -->
+        {% if category_warning %}
+            <div class="category-warning">
+                <strong>⚠️ Different Product Categories</strong>
+                <p>{{ category_warning }}</p>
+            </div>
+        {% elif same_category %}
+            <div class="category-success">
+                <strong>✓ Same Category Comparison</strong>
+                <p>All selected products belong to the same category.</p>
+            </div>
+        {% endif %}
+
+        {% if error %}
+
+            <section class="message-card">
+                <h2>Unable to compare products</h2>
+                <p>{{ error }}</p>
+
+                <a class="primary-button"
+                   href="{{ url_for('products_page') }}">
+                    Back to Products
+                </a>
+            </section>
+
+        {% elif products %}
+
+            <div class="table-wrapper">
+
+                <table class="comparison-table">
+
+                    <thead>
+                        <tr>
+                            <th class="feature-column">Product Details</th>
+
+                            {% for product in products %}
+                                <th class="product-column">
+
+                                    <div class="product-icon">
+                                        {{ product.icon or "📦" }}
+                                    </div>
+
+                                    <!-- Best Value Badge -->
+                                    {% if product.id == best_value_product_id %}
+                                        <span class="best-value-badge">
+                                            🏆 BEST VALUE
+                                        </span>
+                                    {% endif %}
+
+                                    <h2>{{ product.name }}</h2>
+
+                                    <p class="product-category">
+                                        {{ product.category or "Uncategorized" }}
+                                    </p>
+
+                                    <a class="details-button"
+                                       href="{{ url_for('product_details', product_id=product.id) }}">
+                                        View Details
+                                    </a>
+
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <!-- Price -->
+                        <tr class="price-row">
+                            <th>Price</th>
+
+                            {% for product in products %}
+                                <td>
+                                    <strong class="product-price">
+                                        {% if product.price is not none %}
+                                            ₱{{ "{:,.2f}".format(product.price|float) }}
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </strong>
+                                </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- Rating -->
+                        <tr>
+                            <th>Rating</th>
+
+                            {% for product in products %}
+                                <td>
+                                    {% if product.rating is not none %}
+                                        ⭐ {{ product.rating }}/5
+                                    {% else %}
+                                        Not rated
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- Category -->
+                        <tr>
+                            <th>Category</th>
+
+                            {% for product in products %}
+                                <td>
+                                    {{ product.category or "Not specified" }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- RAM -->
+                        <tr>
+                            <th>RAM</th>
+
+                            {% for product in products %}
+                                <td>
+                                    {{ product.ram or "Not specified" }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- Storage -->
+                        <tr>
+                            <th>Storage</th>
+
+                            {% for product in products %}
+                                <td>
+                                    {{ product.storage or "Not specified" }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- Processor -->
+                        <tr>
+                            <th>Processor</th>
+
+                            {% for product in products %}
+                                <td>
+                                    {{ product.processor or "Not specified" }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- Description -->
+                        <tr>
+                            <th>Description</th>
+
+                            {% for product in products %}
+                                <td class="description-cell">
+                                    {{ product.description or "No description available." }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="comparison-footer">
+                <a class="secondary-button"
+                   href="{{ url_for('products_page') }}">
+                    ← Back to Products
+                </a>
+            </div>
+
+        {% endif %}
+
+    </main>
+
+</body>
+</html>

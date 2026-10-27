@@ -663,28 +663,25 @@
 
                             <div class="actions">
 
-                                <!-- EDIT -->
-
-                                <button
-                                    type="button"
-                                    class="btn btn-edit"
-                                    onclick="editProduct(
-                                        {{ product_id }},
-                                        '{{ product.name|replace("'", "\\'") }}',
-                                        '{{ product.category|replace("'", "\\'") }}',
-                                        '{{ product.price }}',
-                                        '{{ product.rating }}',
-                                        '{{ product.icon|replace("'", "\\'") }}',
-                                        '{{ product.description|replace("'", "\\'") }}',
-                                        '{{ product.ram|replace("'", "\\'") }}',
-                                        '{{ product.storage|replace("'", "\\'") }}',
-                                        '{{ product.processor|replace("'", "\\'") }}'
-                                    )"
-                                >
-                                    ✏️ Edit
-                                </button>
-
-
+                        <!-- EDIT -->
+<button
+    type="button"
+    class="btn btn-edit"
+    onclick="editProduct(
+        {{ product_id | tojson | forceescape }},
+        {{ product.name | tojson | forceescape }},
+        {{ product.category | tojson | forceescape }},
+        {{ product.price | tojson | forceescape }},
+        {{ product.rating | tojson | forceescape }},
+        {{ product.icon | tojson | forceescape }},
+        {{ product.description | tojson | forceescape }},
+        {{ product.ram | tojson | forceescape }},
+        {{ product.storage | tojson | forceescape }},
+        {{ product.processor | tojson | forceescape }}
+    )"
+>
+    ✏️ Edit
+</button>
                                 <!-- DELETE -->
 
                                 <form

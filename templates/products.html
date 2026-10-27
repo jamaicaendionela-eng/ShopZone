@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,8 +12,6 @@
           href="{{ url_for('static', filename='css/products.css') }}">
 
     <style>
-        /* Cart notification */
-
         .cart-link {
             position: relative;
         }
@@ -29,14 +28,118 @@
             display: block;
         }
 
-        /* Add to cart feedback */
-
         .add-cart-button {
             position: relative;
         }
 
         .add-cart-button.added {
             background: #16a34a;
+        }
+
+        /* COMPARE BUTTON */
+
+        .compare-button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #2563eb;
+            border-radius: 7px;
+            background: white;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .compare-button:hover {
+            background: #eff6ff;
+        }
+
+        .compare-button.selected {
+            background: #2563eb;
+            color: white;
+        }
+
+        .compare-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* COMPARE SELECTION BAR */
+
+        .compare-bar {
+            display: none;
+            position: sticky;
+            bottom: 15px;
+            z-index: 100;
+            max-width: 900px;
+            margin: 25px auto 0;
+            padding: 16px 20px;
+            background: white;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .compare-bar.visible {
+            display: flex;
+        }
+
+        .compare-status {
+            color: #374151;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .compare-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .compare-actions button {
+            padding: 10px 14px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .clear-compare-button {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .open-compare-button {
+            background: #2563eb;
+            color: white;
+            border: 1px solid #2563eb;
+        }
+
+        .open-compare-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 600px) {
+            .compare-bar {
+                bottom: 8px;
+                margin-top: 20px;
+                padding: 14px;
+            }
+
+            .compare-actions {
+                width: 100%;
+            }
+
+            .compare-actions button {
+                flex: 1;
+            }
         }
     </style>
 </head>
@@ -53,17 +156,11 @@
 
         <nav>
 
-            <a href="{{ url_for('home') }}">
-                Home
-            </a>
+            <a href="{{ url_for('home') }}">Home</a>
 
-            <a href="{{ url_for('products_page') }}">
-                Products
-            </a>
+            <a href="{{ url_for('products_page') }}">Products</a>
 
-            <a href="{{ url_for('home') }}#categories">
-                Categories
-            </a>
+            <a href="{{ url_for('home') }}#categories">Categories</a>
 
             <a href="{{ url_for('cart') }}" class="cart-link">
                 Cart 🛒
@@ -74,17 +171,13 @@
             </a>
 
             {% if session.get('user') %}
-
                 <a href="{{ url_for('logout') }}" class="login-btn">
                     Logout
                 </a>
-
             {% else %}
-
                 <a href="{{ url_for('login') }}" class="login-btn">
                     Login
                 </a>
-
             {% endif %}
 
         </nav>
@@ -96,9 +189,7 @@
 
     <section class="page-header">
 
-        <h1>
-            Our Products
-        </h1>
+        <h1>Our Products</h1>
 
         <p>
             Find the technology and school essentials you need.
@@ -168,6 +259,7 @@
 
                 <div
                     class="product-card"
+                    data-product-id="{{ product_id }}"
                     data-category="{{ product.category }}"
                     data-name="{{ product.name }}"
                 >
@@ -176,16 +268,11 @@
                         {{ product.icon }}
                     </div>
 
-
                     <div class="product-info">
 
-                        <small>
-                            {{ product.category }}
-                        </small>
+                        <small>{{ product.category }}</small>
 
-                        <h3>
-                            {{ product.name }}
-                        </h3>
+                        <h3>{{ product.name }}</h3>
 
                         <div class="rating">
                             ⭐ {{ product.rating }}
@@ -195,7 +282,6 @@
                             ₱{{ "{:,.0f}".format(product.price) }}
                         </p>
 
-
                         <div class="product-buttons">
 
                             <a
@@ -204,7 +290,6 @@
                             >
                                 View Details
                             </a>
-
 
                             <!-- ADD TO CART -->
 
@@ -225,11 +310,60 @@
 
                         </div>
 
+                        <!-- COMPARE PRODUCT -->
+
+                        <button
+                            type="button"
+                            class="compare-button"
+                            data-compare-id="{{ product_id }}"
+                            aria-pressed="false"
+                            onclick="toggleCompareProduct(this)"
+                        >
+                            ⇄ Compare
+                        </button>
+
                     </div>
 
                 </div>
 
             {% endfor %}
+
+        </div>
+
+
+        <!-- COMPARE SELECTION BAR -->
+
+        <div
+            class="compare-bar"
+            id="compareBar"
+            aria-live="polite"
+        >
+
+            <div class="compare-status" id="compareStatus">
+                0 of 4 products selected
+            </div>
+
+            <div class="compare-actions">
+
+                <button
+                    type="button"
+                    class="clear-compare-button"
+                    onclick="clearCompareProducts()"
+                >
+                    Clear
+                </button>
+
+                <button
+                    type="button"
+                    class="open-compare-button"
+                    id="openCompareButton"
+                    onclick="openProductComparison()"
+                    disabled
+                >
+                    Compare Products
+                </button>
+
+            </div>
 
         </div>
 

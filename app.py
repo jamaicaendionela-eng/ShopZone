@@ -75,6 +75,9 @@ def get_products():
             .execute()
         )
 
+        print("SUPABASE RESPONSE:", response.data)
+        print("NUMBER OF PRODUCTS:", len(response.data or []))
+
         products = {}
 
         for product in response.data or []:
@@ -153,12 +156,148 @@ def home():
 @app.route("/products")
 def products_page():
 
+    print("PRODUCTS ROUTE ACCESSED")
+
     products = get_products()
+
+    print("PRODUCTS RECEIVED:", len(products))
 
     return render_template(
         "products.html",
         products=products
     )
+
+
+
+# =========================================================
+# COMPARE PRODUCTS
+# =========================================================
+
+@app.route("/compare")
+def compare_products():
+
+    raw_ids = request.args.getlist("id")
+    # Require 2 to 4 distinct product IDs.
+    if not 2 <= len(raw_ids) <= 4:
+        return render_template(
+            "compare.html",
+            products=[],
+            error="Please select between 2 and 4 products to compare."
+        ), 400
+
+    try:
+        product_ids = [int(product_id) for product_id in raw_ids]
+    except (TypeError, ValueError):
+        return render_template(
+            "compare.html",
+            products=[],
+            error="Invalid product selection. Please select your products again."
+        ), 400
+
+    if len(set(product_ids)) != len(product_ids):
+        return render_template(
+            "compare.html",
+            products=[],
+            error="Duplicate products are not allowed."
+        ), 400
+
+    try:
+        response = (
+            supabase
+            .table("products")
+            .select("*")
+            .in_("id", product_ids)
+            .execute()
+        )
+
+        products_by_id = {
+            int(product["id"]): product
+            for product in (response.data or [])
+        }
+
+    except Exception as e:
+        print("Compare products database error:", e)
+
+        return render_template(
+            "compare.html",
+            products=[],
+            error="Unable to load products for comparison. Please try again."
+        ), 500
+
+    if len(products_by_id) != len(product_ids):
+        return render_template(
+            "compare.html",
+            products=[],
+            error="One or more products could not be found. Please return to the product catalog."
+        ), 404
+
+    selected_products = [
+        products_by_id[product_id]
+        for product_id in product_ids
+    ]
+
+
+    # Check whether all selected products belong to the same category.
+    categories = {
+        (product.get("category") or "").strip().casefold()
+        for product in selected_products
+    }
+
+    same_category = len(categories) == 1
+
+    category_warning = None
+
+    if not same_category:
+        category_warning = (
+            "The selected products belong to different categories. "
+            "For a more accurate comparison, please choose products "
+            "from the same category."
+        )
+    # Calculate a Best Value score using rating and affordability.
+    # A higher rating and lower price contribute to a higher score.
+    max_price = max(
+        (float(p.get("price") or 0) for p in selected_products),
+        default=0
+    )
+
+    for product in selected_products:
+        try:
+            price = float(product.get("price") or 0)
+        except (TypeError, ValueError):
+            price = 0
+
+        try:
+            rating = float(product.get("rating") or 0)
+        except (TypeError, ValueError):
+            rating = 0
+
+        rating_score = max(0, min(rating, 5)) / 5
+
+        if max_price > 0:
+            affordability_score = 1 - (price / max_price)
+        else:
+            affordability_score = 0
+
+        product["best_value_score"] = (
+            rating_score * 0.70
+            + affordability_score * 0.30
+        ) * 100
+
+    # Choose the product with the highest calculated score.
+    best_value_product_id = max(
+        selected_products,
+        key=lambda p: p["best_value_score"]
+    )["id"]
+
+    return render_template(
+        "compare.html",
+        products=selected_products,
+        best_value_product_id=best_value_product_id,
+        same_category=same_category,
+        category_warning=category_warning,
+        error=None
+    )
+
 
 
 # =========================================================
