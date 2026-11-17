@@ -35,6 +35,116 @@
             opacity: 0.8;
             cursor: default;
         }
+
+        /* SIMILAR PRODUCTS */
+
+.similar-products-section {
+    margin: 60px 0;
+    padding: 35px 0;
+}
+
+.similar-products-heading {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.similar-products-heading span {
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.similar-products-heading h2 {
+    font-size: 28px;
+    margin: 10px 0;
+}
+
+.similar-products-heading p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.similar-products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.similar-product-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: 0.3s ease;
+}
+
+.similar-product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.similar-product-image {
+    height: 160px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 55px;
+}
+
+.similar-product-info {
+    padding: 18px;
+}
+
+.similar-product-info small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.similar-product-info h3 {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.similar-product-price {
+    color: #2563eb;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.similar-product-btn {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.similar-product-btn:hover {
+    background: #1d4ed8;
+}
+
+.no-similar-products {
+    text-align: center;
+    color: #64748b;
+    padding: 25px;
+}
+
+@media (max-width: 900px) {
+    .similar-products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 500px) {
+    .similar-products-grid {
+        grid-template-columns: 1fr;
+    }
+}
     </style>
 </head>
 
@@ -57,11 +167,14 @@
                 Categories
             </a>
 
+
             <a href="{{ url_for('products_page') }}">
                 Products
             </a><a href="{{ url_for('budget_planner') }}">
                 Budget Planner
             </a>
+
+            <a href="{{ url_for('bundle_builder') }}">Bundle Builder</a>
 
             <a
                 href="{{ url_for('cart') }}"
@@ -249,10 +362,101 @@
 
         </section>
 
+
+        <!-- SIMILAR PRODUCTS -->
+
+        <section class="similar-products-section">
+
+            <div class="similar-products-heading">
+
+                <span>YOU MAY ALSO LIKE</span>
+
+                <h2>Similar Products</h2>
+
+                <p>
+                    Explore more products from the same category.
+                </p>
+
+            </div>
+
+            {% if similar_products %}
+
+                <div class="similar-products-grid">
+
+                    {% for item in similar_products %}
+
+                        <div class="similar-product-card">
+
+                            <div class="similar-product-image">
+                                {{ item.icon }}
+                            </div>
+
+                            <div class="similar-product-info">
+
+                                <small>
+                                    {{ item.category }}
+                                </small>
+
+                                <h3>
+                                    {{ item.name }}
+                                </h3>
+
+                                <p class="similar-product-price">
+                                    ₱{{ "{:,.2f}".format(item.price) }}
+                                </p>
+
+                                <a href="{{ url_for('product_details', product_id=item.id) }}"
+                                   class="similar-product-btn">
+                                    View Details
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="no-similar-products">
+                    No similar products available in this category yet.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+
     </main>
 
 
     <script src="{{ url_for('static', filename='css/js/product_details.js') }}"></script>
+
+     <!-- FOOTER -->
+
+    <footer>
+
+        <div class="footer-logo">
+            🛒 ShopZone
+        </div>
+
+        <p>
+            Your simple and convenient online shopping website.
+        </p>
+
+        <p class="copyright">
+            © 2026 ShopZone. All rights reserved.
+        </p>
+
+    </footer>
+
+
+    <script
+        src="{{ url_for('static', filename='css/js/script.js') }}">
+    </script>
+
 
 </body>
 

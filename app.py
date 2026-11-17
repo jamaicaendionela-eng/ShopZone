@@ -140,14 +140,229 @@ def get_product(product_id):
         return None
 
 
+def record_product_view(product_id):
+    """
+    Record a product view in Supabase.
+
+    Logged-in users are linked through their session user ID.
+    Guest views are stored with user_id left as NULL.
+    The product page still loads if recording a view fails.
+    """
+
+    user = session.get("user")
+    user_id = user.get("id") if user else None
+
+    view_data = {
+        "product_id": product_id
+    }
+
+    if user_id is not None:
+        view_data["user_id"] = user_id
+
+    try:
+        (
+            supabase
+            .table("product_views")
+            .insert(view_data)
+            .execute()
+        )
+
+        print(
+            f"Product view recorded: product_id={product_id}, "
+            f"user_id={user_id}"
+        )
+
+    except Exception as e:
+        # Do not prevent customers from viewing products
+        # if the view-history insert is unavailable.
+        print("Product view tracking error:", e)
+
+
+
+# =========================================================
+# HOME
+# =========================================================
+
+# =========================================================
+# HOME
+# =========================================================
+
+
 # =========================================================
 # HOME
 # =========================================================
 
 @app.route("/")
 def home():
-    return render_template("index.html")
 
+    recent_products = []
+    recommended_products = []
+    popular_products = []
+
+    user = session.get("user")
+
+    try:
+        # GET ALL PRODUCTS
+        all_products = get_products()
+
+        # =============================================
+        # RECENTLY VIEWED AND RECOMMENDED FOR YOU
+        # =============================================
+
+        if user:
+
+            views_response = (
+                supabase
+                .table("product_views")
+                .select("product_id, viewed_at")
+                .eq("user_id", user["id"])
+                .order("viewed_at", desc=True)
+                .limit(30)
+                .execute()
+            )
+
+            seen_product_ids = set()
+            category_counts = {}
+
+            for view in views_response.data or []:
+
+                product_id = view.get("product_id")
+
+                if product_id is None:
+                    continue
+
+                product_id = int(product_id)
+                seen_product_ids.add(product_id)
+
+                product = all_products.get(product_id)
+
+                if not product:
+                    continue
+
+                category = product.get("category", "")
+
+                if category:
+                    category_counts[category] = (
+                        category_counts.get(category, 0) + 1
+                    )
+
+                # RECENTLY VIEWED
+                if not any(
+                    item["id"] == product_id
+                    for item in recent_products
+                ):
+
+                    recent_item = product.copy()
+                    recent_item["id"] = product_id
+
+                    recent_products.append(recent_item)
+
+            recent_products = recent_products[:4]
+
+            # RECOMMENDED FOR YOU
+            if category_counts:
+
+                sorted_categories = sorted(
+                    category_counts.items(),
+                    key=lambda item: item[1],
+                    reverse=True
+                )
+
+                category_ranking = {
+                    category: index
+                    for index, (category, count)
+                    in enumerate(sorted_categories)
+                }
+
+                for product_id, product in all_products.items():
+
+                    if int(product_id) in seen_product_ids:
+                        continue
+
+                    category = product.get("category", "")
+
+                    if category in category_ranking:
+
+                        item = product.copy()
+                        item["id"] = int(product_id)
+
+                        recommended_products.append(item)
+
+                recommended_products.sort(
+                    key=lambda item: (
+                        category_ranking.get(
+                            item.get("category", ""), 999
+                        ),
+                        -float(item.get("rating") or 0)
+                    )
+                )
+
+                recommended_products = recommended_products[:4]
+
+        # =============================================
+        # POPULAR PICKS
+        # =============================================
+
+        popular_response = (
+            supabase
+            .table("product_views")
+            .select("product_id")
+            .execute()
+        )
+
+        product_view_counts = {}
+
+        for view in popular_response.data or []:
+
+            product_id = view.get("product_id")
+
+            if product_id is None:
+                continue
+
+            product_id = int(product_id)
+
+            product_view_counts[product_id] = (
+                product_view_counts.get(product_id, 0) + 1
+            )
+
+        # Sort products by total number of views.
+        # Use rating as a secondary sorting factor.
+        sorted_popular = sorted(
+            product_view_counts.items(),
+            key=lambda item: (
+                -item[1],
+                -float(
+                    all_products.get(item[0], {}).get("rating") or 0
+                )
+            )
+        )
+
+        for product_id, view_count in sorted_popular:
+
+            product = all_products.get(product_id)
+
+            if product:
+
+                item = product.copy()
+                item["id"] = product_id
+                item["view_count"] = view_count
+
+                popular_products.append(item)
+
+            if len(popular_products) == 4:
+                break
+
+    except Exception as e:
+
+        print("Personalized product feed error:", e)
+
+    return render_template(
+        "index.html",
+        recent_products=recent_products,
+        recommended_products=recommended_products,
+        popular_products=popular_products,
+        logged_in=bool(user)
+    )
 
 # =========================================================
 # PRODUCTS
@@ -317,6 +532,10 @@ def compare_products():
 # PRODUCT DETAILS
 # =========================================================
 
+# =========================================================
+# PRODUCT DETAILS
+# =========================================================
+
 @app.route("/product/<int:product_id>")
 def product_details(product_id):
 
@@ -325,10 +544,49 @@ def product_details(product_id):
     if product is None:
         return "Product not found", 404
 
+    # Record this product view.
+    record_product_view(product_id)
+
+    # Get all products for Similar Products.
+    all_products = get_products()
+    similar_products = []
+
+    current_category = str(
+        product.get("category", "")
+    ).strip().lower()
+
+    for similar_id, similar_product in all_products.items():
+
+        # Do not recommend the product currently being viewed.
+        if int(similar_id) == product_id:
+            continue
+
+        similar_category = str(
+            similar_product.get("category", "")
+        ).strip().lower()
+
+        # Recommend products from the same category.
+        if similar_category == current_category:
+
+            item = similar_product.copy()
+            item["id"] = int(similar_id)
+
+            similar_products.append(item)
+
+    # Show higher-rated products first.
+    similar_products.sort(
+        key=lambda item: item.get("rating", 0),
+        reverse=True
+    )
+
+    # Limit recommendations to four products.
+    similar_products = similar_products[:4]
+
     return render_template(
         "product_details.html",
         product=product,
-        product_id=product_id
+        product_id=product_id,
+        similar_products=similar_products
     )
 
 
@@ -774,6 +1032,54 @@ def remove_from_cart(product_id):
 
     return redirect(
         url_for("cart")
+    )
+
+@app.route("/bundle-builder", methods=["GET", "POST"])
+def bundle_builder():
+    products = get_products()
+
+    if request.method == "POST":
+        selected_ids = request.form.getlist("product_ids")
+
+        if not selected_ids:
+            return render_template(
+                "bundle_builder.html",
+                products=products,
+                error="Please select at least one product."
+            )
+
+        cart = session.get("cart", {})
+        added_count = 0
+
+        for product_id in selected_ids:
+            try:
+                product_id_int = int(product_id)
+            except (TypeError, ValueError):
+                continue
+
+            if product_id_int not in products:
+                continue
+
+            product_key = str(product_id_int)
+            cart[product_key] = cart.get(product_key, 0) + 1
+            added_count += 1
+
+        if added_count == 0:
+            return render_template(
+                "bundle_builder.html",
+                products=products,
+                error="No valid products were selected."
+            )
+
+        session["cart"] = cart
+        session["cart_notification"] = True
+        session.modified = True
+
+        return redirect(url_for("cart"))
+
+    return render_template(
+        "bundle_builder.html",
+        products=products
     )
 
 
@@ -1586,6 +1892,10 @@ def update_order_status(order_id):
         url_for("admin_orders")
     )
 
+@app.route('/categories')
+def categories_page():
+    return render_template('categories.html')
+
 
 # =========================================================
 # RUN APPLICATION
@@ -1596,3 +1906,4 @@ if __name__ == "__main__":
     app.run(
         debug=True
     )
+
