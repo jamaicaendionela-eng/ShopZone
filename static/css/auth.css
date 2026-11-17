@@ -343,3 +343,50 @@ body {
     }
 
 }
+
+/* =========================
+   LOGIN & REGISTER FOOTER
+========================= */
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-page {
+    flex: 1;
+}
+
+body > footer {
+    width: 100%;
+    background: #0f172a;
+    color: #ffffff;
+    text-align: center;
+    padding: 40px 20px;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+body > footer .footer-logo {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+body > footer p {
+    color: #94a3b8;
+    margin: 8px 0;
+    line-height: 1.6;
+}
+
+body > footer .copyright {
+    font-size: 13px;
+    margin-top: 25px;
+}

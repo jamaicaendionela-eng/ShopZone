@@ -1,4 +1,3 @@
-
 /* =====================================
    SHOPZONE PRODUCT COMPARISON
 ===================================== */
@@ -6,8 +5,67 @@
 const MAX_COMPARE_PRODUCTS = 4;
 
 let selectedCompareProducts = [];
-
 let currentCategory = "all";
+
+
+/* =====================================
+   DYNAMIC CATEGORY GENERATION
+===================================== */
+
+function generateCategoryButtons() {
+    const categoryContainer = document.getElementById("categoryContainer");
+
+    if (!categoryContainer) {
+        return;
+    }
+
+    const productCards = document.querySelectorAll(".product-card");
+    const categories = new Set();
+
+    // Collect categories from the products currently rendered by Flask.
+    productCards.forEach((card) => {
+        const category = (card.dataset.category || "").trim();
+
+        if (category) {
+            categories.add(category);
+        }
+    });
+
+    // Sort categories alphabetically.
+    const sortedCategories = Array.from(categories).sort((a, b) =>
+        a.localeCompare(b)
+    );
+
+    // Rebuild the category buttons.
+    categoryContainer.innerHTML = "";
+
+    const allButton = document.createElement("button");
+
+    allButton.type = "button";
+    allButton.className = "category-btn active";
+    allButton.dataset.category = "all";
+    allButton.textContent = "All";
+    allButton.addEventListener("click", () => {
+        filterProducts("all", allButton);
+    });
+
+    categoryContainer.appendChild(allButton);
+
+    sortedCategories.forEach((category) => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "category-btn";
+        button.dataset.category = category;
+        button.textContent = category;
+
+        button.addEventListener("click", () => {
+            filterProducts(category, button);
+        });
+
+        categoryContainer.appendChild(button);
+    });
+}
 
 
 /* =====================================
@@ -30,7 +88,7 @@ function updateProducts() {
 
         const productCategory = (
             card.dataset.category || ""
-        ).toLowerCase();
+        ).trim().toLowerCase();
 
         const matchesSearch =
             productName.includes(searchTerm) ||
@@ -38,7 +96,7 @@ function updateProducts() {
 
         const matchesCategory =
             currentCategory === "all" ||
-            productCategory === currentCategory.toLowerCase();
+            productCategory === currentCategory.trim().toLowerCase();
 
         card.style.display =
             matchesSearch && matchesCategory ? "" : "none";
@@ -75,15 +133,14 @@ function toggleCompareProduct(button) {
 
     const selectedIndex = selectedCompareProducts.indexOf(productId);
 
-    // Remove product if it is already selected.
+    // Remove product if already selected.
     if (selectedIndex !== -1) {
         selectedCompareProducts.splice(selectedIndex, 1);
-
         updateCompareInterface();
         return;
     }
 
-    // Prevent selecting more than four products.
+    // Maximum of four products.
     if (selectedCompareProducts.length >= MAX_COMPARE_PRODUCTS) {
         alert("You can compare a maximum of 4 products.");
         return;
@@ -96,7 +153,7 @@ function toggleCompareProduct(button) {
 
 
 /* =====================================
-   UPDATE SELECTION BAR AND BUTTONS
+   UPDATE COMPARISON INTERFACE
 ===================================== */
 
 function updateCompareInterface() {
@@ -106,7 +163,6 @@ function updateCompareInterface() {
 
     const selectedCount = selectedCompareProducts.length;
 
-    // Show the selection bar when at least one product is selected.
     if (compareBar) {
         compareBar.classList.toggle(
             "visible",
@@ -114,18 +170,15 @@ function updateCompareInterface() {
         );
     }
 
-    // Update the selection counter.
     if (compareStatus) {
         compareStatus.textContent =
             `${selectedCount} of ${MAX_COMPARE_PRODUCTS} products selected`;
     }
 
-    // Enable comparison only when at least two products are selected.
     if (compareButton) {
         compareButton.disabled = selectedCount < 2;
     }
 
-    // Update each product's Compare button.
     document.querySelectorAll(".compare-button").forEach((button) => {
         const productId = String(button.dataset.compareId);
 
@@ -143,7 +196,6 @@ function updateCompareInterface() {
             ? "✓ Selected — Remove"
             : "⇄ Compare";
 
-        // Disable unselected products when the maximum is reached.
         button.disabled =
             !isSelected &&
             selectedCount >= MAX_COMPARE_PRODUCTS;
@@ -152,12 +204,11 @@ function updateCompareInterface() {
 
 
 /* =====================================
-   CLEAR ALL SELECTED PRODUCTS
+   CLEAR SELECTED PRODUCTS
 ===================================== */
 
 function clearCompareProducts() {
     selectedCompareProducts = [];
-
     updateCompareInterface();
 }
 
@@ -180,7 +231,6 @@ function openProductComparison() {
         .map((id) => `id=${encodeURIComponent(id)}`)
         .join("&");
 
-    // The Flask comparison route will be added in a later step.
     window.location.href = `/compare?${queryString}`;
 }
 
@@ -208,14 +258,20 @@ function showCartNotification() {
 
 
 /* =====================================
-   ADD TO CART
+   AJAX ADD TO CART
 ===================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Initialize the comparison interface.
+    // Generate category buttons from existing product cards.
+    generateCategoryButtons();
+
+    // Initialize product filtering.
+    updateProducts();
+
+    // Initialize comparison interface.
     updateCompareInterface();
 
-    // Preserve the existing AJAX Add to Cart behavior.
+    // Preserve AJAX Add to Cart behavior.
     document.querySelectorAll(".add-to-cart-form").forEach((form) => {
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -248,7 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 showCartNotification();
 
-                // Restore the button after a short delay.
                 setTimeout(() => {
                     button.textContent = originalText;
                     button.classList.remove("added");

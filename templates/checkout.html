@@ -219,6 +219,41 @@
                 flex-wrap: wrap;
                 justify-content: center;
             }
+
+            
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    background: #0f172a;
+
+    color: white;
+
+    text-align: center;
+
+    padding: 50px 20px;
+}
+
+.footer-logo {
+    font-size: 25px;
+
+    font-weight: bold;
+
+    margin-bottom: 15px;
+}
+
+footer p {
+    color: #94a3b8;
+
+    margin: 8px;
+}
+
+.copyright {
+    font-size: 13px;
+
+    margin-top: 25px !important;
+}
         }
     </style>
 </head>
@@ -440,6 +475,30 @@
         {% endif %}
 
     </main>
+
+     <!-- FOOTER -->
+
+    <footer>
+
+        <div class="footer-logo">
+            🛒 ShopZone
+        </div>
+
+        <p>
+            Your simple and convenient online shopping website.
+        </p>
+
+        <p class="copyright">
+            © 2026 ShopZone. All rights reserved.
+        </p>
+
+    </footer>
+
+
+    <script
+        src="{{ url_for('static', filename='css/js/script.js') }}">
+    </script>
+
 
 </body>
 </html>
