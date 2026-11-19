@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Trust Profile | ShopZone</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/trust_profile.css') }}">
+</head>
+
+<body>
+
+   <!-- NAVBAR -->
+    <header class="navbar">
+
+        <div class="logo">
+            🛒 ShopZone
+        </div>
+
+        <nav>
+
+            <a href="{{ url_for('home') }}">Home</a>
+
+            <a href="{{ url_for('categories_page') }}">Categories</a>
+
+            <a href="{{ url_for('products_page') }}">Products</a>
+
+            <a href="{{ url_for('budget_planner') }}">
+                Budget Planner
+            </a>
+
+            <a href="{{ url_for('bundle_builder') }}">
+                Bundle Builder
+            </a>
+
+            {% if session.get('user') %}
+                <a href="{{ url_for('trust_profile') }}">
+                    Trust Profile
+                </a>
+            {% endif %}
+
+            <a href="{{ url_for('profile') }}">My Profile</a>
+
+            <a href="{{ url_for('cart') }}">Cart 🛒</a>
+
+            {% if session.get('user') %}
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="login-btn">
+                    Login
+                </a>
+            {% endif %}
+
+        </nav>
+
+    </header>
+
+<main class="container">
+
+    <section class="page-header">
+        <span class="eyebrow">SHOPZONE CUSTOMER TRUST</span>
+        <h1>Trust Profile</h1>
+        <p>
+            Transparency, reliable service, and genuine customer
+            experiences help build trust with every order.
+        </p>
+    </section>
+
+    {% if submitted %}
+        <div class="alert success">
+            Your review has been submitted successfully. Thank you!
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert error">
+            {% if error == "required" %}
+                Please complete all review fields.
+            {% elif error == "invalid" %}
+                Invalid review information. Please try again.
+            {% elif error == "too_long" %}
+                Your review must not exceed 1,000 characters.
+            {% elif error == "not_eligible" %}
+                Only your delivered orders can be reviewed.
+            {% elif error == "duplicate" %}
+                You have already reviewed this order.
+            {% elif error == "submit_failed" %}
+                Unable to submit your review. Please try again.
+            {% else %}
+                {{ error }}
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- TRUST SCORE -->
+
+    <section class="trust-score-card">
+
+        <div class="trust-score-content">
+            <span class="section-label">SHOPZONE TRUST SCORE</span>
+
+            {% if trust_score is not none %}
+                <h2>{{ trust_score }}<small>/100</small></h2>
+                <p>Based on order completion and customer satisfaction.</p>
+            {% else %}
+                <h2>--<small>/100</small></h2>
+                <p>Customer reviews are needed to calculate the trust score.</p>
+            {% endif %}
+        </div>
+
+        <div class="trust-icon">✓</div>
+
+    </section>
+
+    <!-- STORE STATISTICS -->
+
+    <section class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <h3>{{ total_orders }}</h3>
+            <p>Total Orders</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✓</div>
+            <h3>{{ delivered_orders }}</h3>
+            <p>Delivered Orders</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <h3>{{ completion_rate }}%</h3>
+            <p>Order Completion Rate</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <h3>{{ average_rating if total_reviews else "N/A" }}</h3>
+            <p>Average Customer Rating</p>
+        </div>
+
+    </section>
+
+    <!-- CUSTOMER REVIEWS -->
+
+    <section class="content-section">
+
+        <div class="section-heading">
+            <div>
+                <span class="section-label">CUSTOMER FEEDBACK</span>
+                <h2>Verified Purchase Reviews</h2>
+                <p>Reviews submitted by customers with delivered orders.</p>
+            </div>
+
+            <span class="review-count">
+                {{ total_reviews }} Reviews
+            </span>
+        </div>
+
+        {% if reviews %}
+
+            <div class="reviews-grid">
+
+                {% for review in reviews %}
+
+                    <article class="review-card">
+
+                        <div class="review-top">
+
+                            <div class="reviewer-avatar">
+                                {{ review.reviewer_name[0]|upper }}
+                            </div>
+
+                            <div class="reviewer-info">
+                                <h3>{{ review.reviewer_name }}</h3>
+                                <span>Verified Purchase</span>
+                            </div>
+
+                        </div>
+
+                        <div class="stars">
+                            {% for star in range(5) %}
+                                {% if star < review.rating %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <p class="review-text">
+                            {{ review.review }}
+                        </p>
+
+                        <span class="review-date">
+                            {{ review.created_at[:10] if review.created_at else "" }}
+                        </span>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+                <div class="empty-icon">⭐</div>
+                <h3>No Reviews Yet</h3>
+                <p>
+                    Customer reviews will appear here after
+                    successful review submissions.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+    <!-- SUBMIT REVIEW -->
+
+    <section class="content-section review-form-section">
+
+        <div class="section-heading">
+            <div>
+                <span class="section-label">SHARE YOUR EXPERIENCE</span>
+                <h2>Write a Review</h2>
+                <p>
+                    Only delivered orders from your account are eligible.
+                </p>
+            </div>
+        </div>
+
+        {% if available_orders %}
+
+            <form action="{{ url_for('trust_profile') }}"
+                  method="POST"
+                  class="review-form">
+
+                <label for="order_id">Select Delivered Order</label>
+
+                <select name="order_id" id="order_id" required>
+                    <option value="">Choose an order</option>
+
+                    {% for order in available_orders %}
+                        <option value="{{ order.id }}">
+                            Order #{{ order.id }}
+                            {% if order.created_at %}
+                                - {{ order.created_at[:10] }}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+                <label for="rating">Your Rating</label>
+
+                <select name="rating" id="rating" required>
+                    <option value="">Select a rating</option>
+                    <option value="5">★★★★★ - Excellent</option>
+                    <option value="4">★★★★ - Very Good</option>
+                    <option value="3">★★★ - Good</option>
+                    <option value="2">★★ - Fair</option>
+                    <option value="1">★ - Poor</option>
+                </select>
+
+                <label for="review">Your Review</label>
+
+                <textarea
+                    name="review"
+                    id="review"
+                    rows="5"
+                    maxlength="1000"
+                    placeholder="Share your experience with ShopZone..."
+                    required></textarea>
+
+                <button type="submit" class="submit-btn">
+                    Submit Review
+                </button>
+
+            </form>
+
+        {% else %}
+
+            <div class="empty-state">
+                <h3>No Eligible Orders</h3>
+                <p>
+                    You need a delivered order that has not yet been
+                    reviewed before you can submit feedback.
+                </p>
+                <a href="{{ url_for('orders') }}" class="secondary-btn">
+                    View My Orders
+                </a>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</main>
+
+<footer class="footer">
+    <p>© 2026 ShopZone. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

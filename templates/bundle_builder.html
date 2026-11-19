@@ -13,29 +13,52 @@
 
 <body>
 
-    <!-- NAVBAR -->
+  
+ <!-- NAVBAR -->
     <header class="navbar">
-        <div class="logo">🛒 ShopZone</div>
+
+        <div class="logo">
+            🛒 ShopZone
+        </div>
 
         <nav>
+
             <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('home') }}#categories">
-                Categories
-            </a>
+
+            <a href="{{ url_for('categories_page') }}">Categories</a>
 
             <a href="{{ url_for('products_page') }}">Products</a>
-            <a href="{{ url_for('budget_planner') }}">Budget Planner</a>
-            <a href="{{ url_for('bundle_builder') }}" class="active">
+
+            <a href="{{ url_for('budget_planner') }}">
+                Budget Planner
+            </a>
+
+            <a href="{{ url_for('bundle_builder') }}">
                 Bundle Builder
             </a>
-            <a href="{{ url_for('cart') }}" class="cart-link">Cart 🛒</a>
 
             {% if session.get('user') %}
-                <a href="{{ url_for('logout') }}">Logout</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('trust_profile') }}">
+                    Trust Profile
+                </a>
             {% endif %}
+
+            <a href="{{ url_for('profile') }}">My Profile</a>
+
+            <a href="{{ url_for('cart') }}">Cart 🛒</a>
+
+            {% if session.get('user') %}
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="login-btn">
+                    Login
+                </a>
+            {% endif %}
+
         </nav>
+
     </header>
 
 

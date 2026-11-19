@@ -1,0 +1,1412 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile | ShopZone</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+          <style>
+
+   
+.profile-page,
+.profile-page * {
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #100b1d, #1c1230, #281747);
+}
+
+.profile-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 45px 20px 70px;
+}
+
+.profile-header {
+    margin-bottom: 30px;
+}
+
+.profile-header span {
+    color: #c4a5fd;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.profile-header h1 {
+    font-size: 30px;
+    margin: 8px 0;
+    color: #ffffff;
+}
+
+.profile-header p {
+    color: #b6a9ca;
+    font-size: 14px;
+}
+
+.profile-card {
+    background: linear-gradient(145deg, #211633, #171020);
+    border: 1px solid #44315f;
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.profile-overview {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #c084fc);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.25);
+}
+
+.profile-overview h2 {
+    font-size: 21px;
+    margin-bottom: 6px;
+    color: #ffffff;
+}
+
+.profile-overview p {
+    color: #b6a9ca;
+    font-size: 14px;
+}
+
+.section-title {
+    font-size: 19px;
+    color: #ffffff;
+    margin-bottom: 7px;
+}
+
+.section-description {
+    color: #b6a9ca;
+    font-size: 13px;
+    margin-bottom: 24px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e9ddfa;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #49375f;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background: #120d1c;
+    color: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input::placeholder {
+    color: #827392;
+}
+
+.form-group input:focus {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+}
+
+.form-group input[readonly] {
+    background: #292037;
+    color: #a99bb9;
+    border-color: #3c304d;
+    cursor: not-allowed;
+}
+
+.form-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.save-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s ease;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
+}
+
+.save-btn:hover {
+    background: linear-gradient(135deg, #6d28d9, #9333ea);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(124, 58, 237, 0.35);
+}
+
+.account-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    padding: 15px;
+    background: #171020;
+    border: 1px solid #3d2c54;
+    border-radius: 9px;
+}
+
+.info-item span {
+    display: block;
+    color: #aa9bbd;
+    font-size: 12px;
+    margin-bottom: 7px;
+}
+
+.info-item strong {
+    color: #f8fafc;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.alert {
+    padding: 13px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.alert.success {
+    background: #123326;
+    color: #86efac;
+    border: 1px solid #246344;
+}
+
+.alert.error {
+    background: #3b1725;
+    color: #fda4af;
+    border: 1px solid #7f263e;
+}
+
+.security-note {
+    margin-top: 15px;
+    color: #a99bb9;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* REWARDS */
+
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.reward-box {
+    padding: 22px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #211633, #171020);
+    border: 1px solid #44315f;
+}
+
+.reward-box.primary {
+    background: linear-gradient(135deg, #54258b, #291641);
+    border-color: #8954c7;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.2);
+}
+
+.reward-box span {
+    display: block;
+    color: #c1b2d2;
+    font-size: 12px;
+    margin-bottom: 12px;
+}
+
+.reward-box strong {
+    font-size: 27px;
+    color: #ffffff;
+}
+
+.reward-box.primary strong {
+    color: #e9d5ff;
+}
+
+.reward-note {
+    color: #b6a9ca;
+    font-size: 12px;
+    margin-top: 15px;
+}
+
+.reward-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.reward-table th,
+.reward-table td {
+    padding: 13px 12px;
+    text-align: left;
+    border-bottom: 1px solid #3b2b50;
+    font-size: 13px;
+}
+
+.reward-table th {
+    color: #d8c6ed;
+    background: #2a1d3b;
+}
+
+.reward-table td {
+    color: #e9e2f2;
+}
+
+.earn-points {
+    color: #4ade80;
+    font-weight: 700;
+}
+
+.redeem-points {
+    color: #fb7185;
+    font-weight: 700;
+}
+
+.empty-message {
+    padding: 25px;
+    text-align: center;
+    color: #a99bb9;
+    font-size: 13px;
+    background: #171020;
+    border: 1px dashed #49375f;
+    border-radius: 9px;
+}
+
+/* PURCHASE HISTORY */
+
+.order-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 23px;
+}
+
+.filter-link {
+    display: inline-block;
+    padding: 9px 15px;
+    border-radius: 20px;
+    background: #211633;
+    color: #d4c5e5;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #49375f;
+    transition: 0.2s ease;
+}
+
+.filter-link:hover,
+.filter-link.active {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #ffffff;
+    border-color: #a855f7;
+}
+
+.order-card {
+    border: 1px solid #44315f;
+    border-radius: 11px;
+    margin-bottom: 17px;
+    overflow: hidden;
+    background: #1b1427;
+}
+
+.order-top {
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background: #281d39;
+}
+
+.order-number {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.order-date {
+    color: #b6a9ca;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.order-status {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #493516;
+    color: #fcd34d;
+}
+
+.status-processing {
+    background: #1e3558;
+    color: #93c5fd;
+}
+
+.status-shipped {
+    background: #392454;
+    color: #d8b4fe;
+}
+
+.status-delivered {
+    background: #153b2b;
+    color: #86efac;
+}
+
+.status-cancelled {
+    background: #481d2b;
+    color: #fda4af;
+}
+
+.status-default {
+    background: #332b40;
+    color: #d6c8e5;
+}
+
+.order-summary {
+    padding: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.order-summary span {
+    display: block;
+    color: #aa9bbd;
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+.order-summary strong {
+    font-size: 13px;
+    color: #ffffff;
+    overflow-wrap: anywhere;
+}
+
+.order-details {
+    border-top: 1px solid #3b2b50;
+}
+
+.order-details summary {
+    padding: 14px 18px;
+    cursor: pointer;
+    color: #c4a5fd;
+    font-size: 13px;
+    font-weight: 700;
+    list-style-position: inside;
+    transition: background 0.2s;
+}
+
+.order-details summary:hover {
+    background: #2a1d3b;
+}
+
+.order-products {
+    padding: 0 18px 18px;
+}
+
+.product-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 13px 0;
+    border-bottom: 1px solid #30243f;
+}
+
+.product-info strong {
+    display: block;
+    color: #ffffff;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.product-info span {
+    color: #b6a9ca;
+    font-size: 12px;
+}
+
+.product-subtotal {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e9d5ff;
+    white-space: nowrap;
+}
+
+.order-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 17px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.order-address {
+    color: #b6a9ca;
+    font-size: 12px;
+    margin-top: 15px;
+    line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+    .profile-page {
+        padding: 30px 15px 45px;
+    }
+
+    .profile-card {
+        padding: 20px;
+    }
+
+    .profile-header h1 {
+        font-size: 25px;
+    }
+
+    .form-grid,
+    .account-info {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-overview {
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+    .save-btn {
+        width: 100%;
+    }
+
+    .rewards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .order-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .order-top {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .reward-table {
+        min-width: 550px;
+    }
+
+    .reward-table-wrapper {
+        overflow-x: auto;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <header class="navbar">
+
+        <div class="logo">
+            🛒 ShopZone
+        </div>
+
+        <nav>
+
+            <a href="{{ url_for('home') }}">Home</a>
+
+            <a href="{{ url_for('categories_page') }}">Categories</a>
+
+            <a href="{{ url_for('products_page') }}">Products</a>
+
+            <a href="{{ url_for('budget_planner') }}">Budget Planner</a>
+
+            <a href="{{ url_for('bundle_builder') }}">Bundle Builder</a>
+
+            {% if session.get('user') %}
+
+                <a href="{{ url_for('profile') }}">My Profile</a>
+
+                <a href="{{ url_for('trust_profile') }}">Trust Profile</a>
+
+            {% endif %}
+
+            <a href="{{ url_for('cart') }}">Cart 🛒</a>
+
+            {% if session.get('user') %}
+
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}" class="login-btn">
+                    Login
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+    </header>
+
+
+    <main class="profile-page">
+
+        <div class="profile-header">
+
+            <span>ACCOUNT MANAGEMENT</span>
+
+            <h1>My Profile</h1>
+
+            <p>
+                Manage your account, rewards, and shopping activities.
+            </p>
+
+        </div>
+
+
+        <!-- ALERT MESSAGES -->
+
+        {% if updated == "1" %}
+
+            <div class="alert success">
+                Your profile information has been updated successfully.
+            </div>
+
+        {% endif %}
+
+        {% if password_changed == "1" %}
+
+            <div class="alert success">
+                Your password has been changed successfully.
+            </div>
+
+        {% endif %}
+
+        {% if error %}
+
+            <div class="alert error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <!-- PROFILE OVERVIEW -->
+
+        <section class="profile-card">
+
+            <div class="profile-overview">
+
+                <div class="profile-avatar">
+                    {{ profile.name[:1]|upper if profile.name else "U" }}
+                </div>
+
+                <div>
+                    <h2>{{ profile.name }}</h2>
+                    <p>{{ profile.email }}</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+      
+<!-- MY REWARDS -->
+
+<section class="profile-card" id="rewards">
+
+    <h2 class="section-title">My Rewards</h2>
+
+    <p class="section-description">
+        Earn reward points when your purchases are successfully delivered.
+    </p>
+
+    <div class="rewards-grid">
+
+        <div class="reward-box primary">
+            <span>Available Points</span>
+            <strong>{{ reward_balance|default(0) }}</strong>
+        </div>
+
+        <div class="reward-box">
+            <span>Total Points Earned</span>
+            <strong>{{ total_earned|default(0) }}</strong>
+        </div>
+
+        <div class="reward-box">
+            <span>Total Points Redeemed</span>
+            <strong>{{ total_redeemed|default(0) }}</strong>
+        </div>
+
+    </div>
+
+    <p class="reward-note">
+        Earn 1 point for every ₱100 spent.
+        Points are credited only after an order is marked Delivered.
+    </p>
+
+    <!-- REDEEM REWARDS -->
+
+    <div class="redeem-section">
+
+        <h3 class="section-title">Redeem Your Points</h3>
+
+        <p class="section-description">
+            Convert your points into ShopZone discount vouchers.
+        </p>
+
+        <div class="redeem-conversion">
+            <strong>100 Points = ₱10 Discount</strong>
+            <span>Minimum redemption: 100 points</span>
+        </div>
+
+        {% if redeemed and redeemed_voucher %}
+
+            <div class="redeem-success">
+
+                <h3>Redemption Successful!</h3>
+
+                <p>
+                    You redeemed points for a
+                    ₱{{ redeemed_discount }} discount voucher.
+                </p>
+
+                <div class="voucher-code">
+                    {{ redeemed_voucher }}
+                </div>
+
+                <p>
+                    Save this voucher code for your checkout.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+        {% if error %}
+
+            <div class="redeem-error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('profile') }}">
+
+            <input type="hidden"
+                   name="action"
+                   value="redeem_rewards">
+
+            <div class="form-group">
+
+                <label for="redeem_points">
+                    Points to Redeem
+                </label>
+
+                <input
+                    type="number"
+                    id="redeem_points"
+                    name="redeem_points"
+                    min="100"
+                    step="100"
+                    max="{{ reward_balance }}"
+                    placeholder="Enter points (e.g. 100)"
+                    required
+                    {% if reward_balance < 100 %}disabled{% endif %}
+                >
+
+            </div>
+
+            <p class="reward-note">
+                Available balance:
+                <strong>{{ reward_balance }} points</strong>
+            </p>
+
+            {% if reward_balance >= 100 %}
+
+                <button type="submit" class="save-btn">
+                    Redeem Points
+                </button>
+
+            {% else %}
+
+                <button type="button" class="save-btn" disabled>
+                    Not Enough Points
+                </button>
+
+                <p class="reward-note">
+                    You need at least 100 points to redeem a voucher.
+                </p>
+
+            {% endif %}
+
+        </form>
+
+    </div>
+
+    <!-- REWARD TRANSACTION HISTORY -->
+
+    <h3 class="section-title" style="margin-top: 30px;">
+        Reward Transaction History
+    </h3>
+
+    {% if reward_transactions %}
+
+        <div class="reward-table-wrapper">
+
+            <table class="reward-table">
+
+                <thead>
+                    <tr>
+                        <th>Transaction</th>
+                        <th>Order ID</th>
+                        <th>Points</th>
+                        <th>Voucher Code</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for transaction in reward_transactions %}
+
+                        <tr>
+
+                            <td>
+                                {{ transaction.transaction_type|title }}
+                            </td>
+
+                            <td>
+                                {{ transaction.order_id or "—" }}
+                            </td>
+
+                            <td>
+
+                                {% if transaction.transaction_type|lower == "earn" %}
+
+                                    <span class="earn-points">
+                                        +{{ transaction.points }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="redeem-points">
+                                        -{{ transaction.points }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ transaction.voucher_code or "—" }}
+                            </td>
+
+                            <td>
+                                {{ transaction.created_at or "—" }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-message">
+            No reward transactions yet.
+        </div>
+
+    {% endif %}
+
+</section>
+
+        <!-- PURCHASE HISTORY -->
+
+        <section class="profile-card" id="purchase-history">
+
+            <h2 class="section-title">
+                My Purchase History
+            </h2>
+
+            <p class="section-description">
+                View your orders, purchased products, and delivery status.
+            </p>
+
+            {% set selected_status = request.args.get('status', 'All') %}
+
+            <div class="order-filters">
+
+                {% for filter_status in [
+                    'All',
+                    'Pending',
+                    'Processing',
+                    'Shipped',
+                    'Delivered',
+                    'Cancelled'
+                ] %}
+
+                    <a href="{{ url_for('profile', status=filter_status, _anchor='purchase-history') }}"
+                       class="filter-link {% if selected_status == filter_status %}active{% endif %}">
+
+                        {{ filter_status }}
+
+                    </a>
+
+                {% endfor %}
+
+            </div>
+
+
+            {% set visible_orders = namespace(count=0) %}
+
+            {% for order in orders %}
+
+                {% if selected_status == 'All' or order.status|default('Pending')|lower == selected_status|lower %}
+
+                    {% set visible_orders.count = visible_orders.count + 1 %}
+
+                    <div class="order-card">
+
+                        <!-- ORDER HEADER -->
+
+                        <div class="order-top">
+
+                            <div>
+
+                                <div class="order-number">
+                                    Order #{{ order.id }}
+                                </div>
+
+                                <div class="order-date">
+                                    {{ order.created_at or "Date unavailable" }}
+                                </div>
+
+                            </div>
+
+                            {% set current_status = order.status|default('Pending')|lower %}
+
+                            <span class="order-status
+                                {% if current_status == 'pending' %}status-pending
+                                {% elif current_status == 'processing' %}status-processing
+                                {% elif current_status == 'shipped' %}status-shipped
+                                {% elif current_status == 'delivered' %}status-delivered
+                                {% elif current_status == 'cancelled' %}status-cancelled
+                                {% else %}status-default
+                                {% endif %}">
+
+                                {{ order.status or "Unknown" }}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- ORDER SUMMARY -->
+
+                        <div class="order-summary">
+
+                            <div>
+
+                                <span>Order Total</span>
+
+                                <strong>
+                                    ₱{{ "%.2f"|format(order.total|float) }}
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>Payment Method</span>
+
+                                <strong>
+                                    {{ order.payment_method or "Not specified" }}
+                                </strong>
+
+                            </div>
+
+                            <div>
+
+                                <span>Products</span>
+
+                                <strong>
+                                    {{ order["items"]|length }} item(s)
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- EXPANDABLE ORDER DETAILS -->
+
+                        <details class="order-details">
+
+                            <summary>
+                                View Order Details
+                            </summary>
+
+                            <div class="order-products">
+
+                                {% if order.items %}
+
+                                    {% for item in order["items"] %}
+
+                                        <div class="product-row">
+
+                                            <div class="product-info">
+
+                                                <strong>
+                                                    {{ item.product_name }}
+                                                </strong>
+
+                                                <span>
+                                                    ₱{{ "%.2f"|format(item.price|float) }}
+                                                    ×
+                                                    {{ item.quantity }}
+                                                </span>
+
+                                            </div>
+
+                                            <div class="product-subtotal">
+
+                                                ₱{{ "%.2f"|format(item.subtotal|float) }}
+
+                                            </div>
+
+                                        </div>
+
+                                    {% endfor %}
+
+                                {% else %}
+
+                                    <div class="empty-message">
+                                        No product details available for this order.
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="order-total">
+
+                                    <span>Order Total</span>
+
+                                    <span>
+                                        ₱{{ "%.2f"|format(order.total|float) }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="order-address">
+
+                                    <strong>Delivery Address:</strong><br>
+
+                                    {{ order.address or "No address available" }}
+
+                                    <br><br>
+
+                                    <strong>Customer:</strong>
+                                    {{ order.full_name or profile.name }}
+
+                                </div>
+
+                            </div>
+
+                        </details>
+
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+
+            {% if visible_orders.count == 0 %}
+
+                <div class="empty-message">
+
+                    {% if selected_status == 'All' %}
+
+                        You have no purchase history yet.
+
+                    {% else %}
+
+                        No {{ selected_status|lower }} orders found.
+
+                    {% endif %}
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- PERSONAL INFORMATION -->
+
+        <section class="profile-card">
+
+            <h2 class="section-title">
+                Personal Information
+            </h2>
+
+            <p class="section-description">
+                Update your personal and contact information.
+            </p>
+
+            <form method="POST" action="{{ url_for('profile') }}">
+
+                <input type="hidden"
+                       name="action"
+                       value="update_profile">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="name">Full Name</label>
+
+                        <input type="text"
+                               id="name"
+                               name="name"
+                               value="{{ profile.name or '' }}"
+                               maxlength="100"
+                               required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="email">Email Address</label>
+
+                        <input type="email"
+                               id="email"
+                               value="{{ profile.email or '' }}"
+                               readonly>
+
+                    </div>
+
+                    <div class="form-group full">
+
+                        <label for="phone">Phone Number</label>
+
+                        <input type="tel"
+                               id="phone"
+                               name="phone"
+                               value="{{ profile.phone or '' }}"
+                               placeholder="Enter your phone number">
+
+                    </div>
+
+                </div>
+
+
+                <h2 class="section-title" style="margin-top: 30px;">
+                    Address Information
+                </h2>
+
+                <p class="section-description">
+                    Keep your delivery address updated for easier checkout.
+                </p>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group full">
+
+                        <label for="address_line">
+                            House No. / Street / Address
+                        </label>
+
+                        <input type="text"
+                               id="address_line"
+                               name="address_line"
+                               value="{{ profile.address_line or '' }}"
+                               placeholder="House number, street, subdivision">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="barangay">Barangay</label>
+
+                        <input type="text"
+                               id="barangay"
+                               name="barangay"
+                               value="{{ profile.barangay or '' }}"
+                               placeholder="Enter barangay">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="city">City / Municipality</label>
+
+                        <input type="text"
+                               id="city"
+                               name="city"
+                               value="{{ profile.city or '' }}"
+                               placeholder="Enter city or municipality">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="province">Province</label>
+
+                        <input type="text"
+                               id="province"
+                               name="province"
+                               value="{{ profile.province or '' }}"
+                               placeholder="Enter province">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="postal_code">Postal Code</label>
+
+                        <input type="text"
+                               id="postal_code"
+                               name="postal_code"
+                               value="{{ profile.postal_code or '' }}"
+                               placeholder="Enter postal code">
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button type="submit" class="save-btn">
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- CHANGE PASSWORD -->
+
+        <section class="profile-card">
+
+            <h2 class="section-title">
+                Account Security
+            </h2>
+
+            <p class="section-description">
+                Change your password to keep your account secure.
+            </p>
+
+            <form method="POST" action="{{ url_for('profile') }}">
+
+                <input type="hidden"
+                       name="action"
+                       value="change_password">
+
+                <div class="form-grid">
+
+                    <div class="form-group full">
+
+                        <label for="current_password">
+                            Current Password
+                        </label>
+
+                        <input type="password"
+                               id="current_password"
+                               name="current_password"
+                               autocomplete="current-password"
+                               required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="new_password">
+                            New Password
+                        </label>
+
+                        <input type="password"
+                               id="new_password"
+                               name="new_password"
+                               minlength="8"
+                               autocomplete="new-password"
+                               required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm New Password
+                        </label>
+
+                        <input type="password"
+                               id="confirm_password"
+                               name="confirm_password"
+                               minlength="8"
+                               autocomplete="new-password"
+                               required>
+
+                    </div>
+
+                </div>
+
+                <p class="security-note">
+                    Your new password must contain at least 8 characters.
+                    You must enter your current password before changing it.
+                </p>
+
+                <div class="form-actions">
+
+                    <button type="submit" class="save-btn">
+                        Change Password
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- ACCOUNT INFORMATION -->
+
+        <section class="profile-card">
+
+            <h2 class="section-title">
+                Account Information
+            </h2>
+
+            <p class="section-description">
+                Basic details about your ShopZone account.
+            </p>
+
+            <div class="account-info">
+
+                <div class="info-item">
+
+                    <span>Account ID</span>
+
+                    <strong>{{ profile.id }}</strong>
+
+                </div>
+
+                <div class="info-item">
+
+                    <span>Registered Date</span>
+
+                    <strong>
+                        {{ profile.created_at or "Not available" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <div class="footer-logo">
+            🛒 ShopZone
+        </div>
+
+        <p>
+            Your simple and convenient online shopping website.
+        </p>
+
+        <p class="copyright">
+            © 2026 ShopZone. All rights reserved.
+        </p>
+
+    </footer>
+
+
+    <script src="{{ url_for('static', filename='css/js/script.js') }}"></script>
+
+</body>
+</html>

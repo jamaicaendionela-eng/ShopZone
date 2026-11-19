@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,179 +12,53 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/budget_planner.css') }}"
     >
-
-    <style>
-        /* SHOPZONE NAVBAR */
-
-        .navbar {
-            background: #ffffff;
-            padding: 18px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .navbar .logo {
-            font-size: 22px;
-            font-weight: bold;
-            color: #2563eb;
-            white-space: nowrap;
-            text-decoration: none;
-        }
-
-        .navbar nav {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .navbar nav a {
-            position: relative;
-            text-decoration: none;
-            color: #374151;
-            padding: 9px 12px;
-            border-radius: 7px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .navbar nav a:hover {
-            color: #2563eb;
-            background: #eff6ff;
-        }
-
-        .navbar nav a.active {
-            color: #2563eb;
-            background: #eff6ff;
-            font-weight: 700;
-        }
-
-        .navbar nav .cart-link {
-            position: relative;
-        }
-
-        .navbar nav .cart-notification {
-            position: absolute;
-            top: 3px;
-            right: 3px;
-            width: 9px;
-            height: 9px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid #ffffff;
-        }
-
-        .navbar nav a.login-btn {
-            background: #2563eb;
-            color: #ffffff;
-            padding: 10px 16px;
-        }
-
-        .navbar nav a.login-btn:hover {
-            background: #1d4ed8;
-            color: #ffffff;
-        }
-
-        @media (max-width: 900px) {
-            .navbar {
-                padding: 16px 20px;
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .navbar nav {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .navbar {
-                padding: 14px 10px;
-            }
-
-            .navbar nav {
-                gap: 4px;
-            }
-
-            .navbar nav a {
-                padding: 8px;
-                font-size: 12px;
-            }
-        }
-    </style>
 </head>
 
 <body>
 
-    <!-- SHOPZONE NAVBAR -->
-
+    <!-- NAVBAR -->
     <header class="navbar">
 
-        <a href="{{ url_for('home') }}" class="logo">
+        <div class="logo">
             🛒 ShopZone
-        </a>
+        </div>
 
         <nav>
+            <a href="{{ url_for('home') }}">Home</a>
 
-            <a href="{{ url_for('home') }}">
-                Home
-            </a>
-            <a href="{{ url_for('home') }}#categories">
-                Categories
-            </a>
+            <a href="{{ url_for('categories_page') }}">Categories</a>
 
+            <a href="{{ url_for('products_page') }}">Products</a>
 
-                        <a href="{{ url_for('products_page') }}">
-                Products
-            </a>
-
-            <a
-                href="{{ url_for('budget_planner') }}"
-                class="active"
-                aria-current="page"
-            >
+            <a href="{{ url_for('budget_planner') }}" class="active" aria-current="page">
                 Budget Planner
             </a>
 
             <a href="{{ url_for('bundle_builder') }}">Bundle Builder</a>
 
-            <a href="{{ url_for('cart') }}" class="cart-link">
-                Cart 🛒
+            {% if session.get('user') %}
+                <a href="{{ url_for('trust_profile') }}">Trust Profile</a>
+            {% endif %}
 
-                {% if session.get('cart_notification') %}
-                    <span class="cart-notification"></span>
-                {% endif %}
-            </a>
+            <a href="{{ url_for('profile') }}">My Profile</a>
+
+            <a href="{{ url_for('cart') }}">Cart 🛒</a>
 
             {% if session.get('user') %}
-
                 <a href="{{ url_for('logout') }}" class="login-btn">
                     Logout
                 </a>
-
             {% else %}
-
                 <a href="{{ url_for('login') }}" class="login-btn">
                     Login
                 </a>
-
             {% endif %}
-
         </nav>
 
     </header>
 
 
     <!-- MAIN CONTENT -->
-
     <main class="planner-container">
 
         <section class="page-heading">
@@ -198,7 +73,6 @@
 
 
         <!-- BUDGET SUMMARY -->
-
         <section class="budget-panel">
 
             <div class="section-heading">
@@ -217,7 +91,7 @@
                 <input
                     type="number"
                     id="budgetInput"
-                    min="0"
+                    min="0.01"
                     step="0.01"
                     placeholder="e.g. 30000"
                 >
@@ -229,6 +103,7 @@
             </div>
 
             <p id="budgetMessage" class="message" aria-live="polite"></p>
+
 
             <div class="summary-grid">
 
@@ -249,11 +124,12 @@
 
             </div>
 
+
             <div class="progress-section">
 
                 <div class="progress-label">
                     <span>Budget Usage</span>
-                    <strong id="budgetPercentage">0%</strong>
+                    <strong id="budgetPercentage">0.0%</strong>
                 </div>
 
                 <div
@@ -285,7 +161,6 @@
 
 
         <!-- AVAILABLE PRODUCTS -->
-
         <section class="products-panel">
 
             <div class="section-heading">
@@ -294,6 +169,7 @@
                     <p>Select products to build your shopping list.</p>
                 </div>
             </div>
+
 
             <div class="product-filters">
 
@@ -310,13 +186,16 @@
                 >
                     <option value="all">All Categories</option>
 
-                    {% for product_id, product in products.items() %}
-                        <option value="{{ product.category }}">
-                            {{ product.category }}
+                    {% set categories = products.values() | map(attribute='category') | unique | list %}
+
+                    {% for category in categories %}
+                        <option value="{{ category }}">
+                            {{ category }}
                         </option>
                     {% endfor %}
 
                 </select>
+
 
                 <select
                     id="priceFilter"
@@ -327,6 +206,7 @@
                 </select>
 
             </div>
+
 
             <div class="product-grid" id="budgetProductGrid">
 
@@ -389,7 +269,6 @@
 
 
         <!-- SHOPPING LIST -->
-
         <section class="shopping-panel">
 
             <div class="section-heading">
@@ -408,6 +287,7 @@
                 </button>
 
             </div>
+
 
             <div class="table-wrapper">
 
@@ -437,6 +317,7 @@
 
             </div>
 
+
             <div class="shopping-footer">
 
                 <div>
@@ -465,7 +346,6 @@
 
 
         <!-- AFFORDABLE ALTERNATIVES -->
-
         <section class="alternatives-panel">
 
             <div class="section-heading">
@@ -492,22 +372,7 @@
 
 
     <!-- FOOTER -->
-
     <footer class="planner-footer">
-        <p>ShopZone Budget Planner</p>
-    </footer>
-
-
-    <!-- BUDGET PLANNER JAVASCRIPT -->
-
-    <script
-        src="{{ url_for('static', filename='css/js/budget_planner.js') }}"
-        defer
-    ></script>
-
-     <!-- FOOTER -->
-
-    <footer>
 
         <div class="footer-logo">
             🛒 ShopZone
@@ -524,10 +389,16 @@
     </footer>
 
 
+    <!-- JAVASCRIPT -->
     <script
-        src="{{ url_for('static', filename='css/js/script.js') }}">
-    </script>
+        src="{{ url_for('static', filename='css/js/budget_planner.js') }}"
+        defer
+    ></script>
 
+    <script
+        src="{{ url_for('static', filename='css/js/script.js') }}"
+        defer
+    ></script>
 
 </body>
 </html>
