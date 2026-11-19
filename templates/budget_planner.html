@@ -23,37 +23,69 @@
             🛒 ShopZone
         </div>
 
-        <nav>
-            <a href="{{ url_for('home') }}">Home</a>
+       
+<nav>
+    <a href="{{ url_for('home') }}"
+       class="{{ 'active' if request.endpoint == 'home' else '' }}"
+       {% if request.endpoint == 'home' %}aria-current="page"{% endif %}>
+        Home
+    </a>
 
-            <a href="{{ url_for('categories_page') }}">Categories</a>
+    <a href="{{ url_for('categories_page') }}"
+       class="{{ 'active' if request.endpoint == 'categories_page' else '' }}"
+       {% if request.endpoint == 'categories_page' %}aria-current="page"{% endif %}>
+        Categories
+    </a>
 
-            <a href="{{ url_for('products_page') }}">Products</a>
+    <a href="{{ url_for('products_page') }}"
+       class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}"
+       {% if request.endpoint in ['products_page', 'product_details'] %}aria-current="page"{% endif %}>
+        Products
+    </a>
 
-            <a href="{{ url_for('budget_planner') }}" class="active" aria-current="page">
-                Budget Planner
-            </a>
+    <a href="{{ url_for('budget_planner') }}"
+       class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}"
+       {% if request.endpoint == 'budget_planner' %}aria-current="page"{% endif %}>
+        Budget Planner
+    </a>
 
-            <a href="{{ url_for('bundle_builder') }}">Bundle Builder</a>
+    <a href="{{ url_for('bundle_builder') }}"
+       class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}"
+       {% if request.endpoint == 'bundle_builder' %}aria-current="page"{% endif %}>
+        Bundle Builder
+    </a>
 
-            {% if session.get('user') %}
-                <a href="{{ url_for('trust_profile') }}">Trust Profile</a>
-            {% endif %}
+    {% if session.get('user') %}
+        <a href="{{ url_for('trust_profile') }}"
+           class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}"
+           {% if request.endpoint == 'trust_profile' %}aria-current="page"{% endif %}>
+            Trust Profile
+        </a>
+    {% endif %}
 
-            <a href="{{ url_for('profile') }}">My Profile</a>
+    <a href="{{ url_for('profile') }}"
+       class="{{ 'active' if request.endpoint == 'profile' else '' }}"
+       {% if request.endpoint == 'profile' %}aria-current="page"{% endif %}>
+        My Profile
+    </a>
 
-            <a href="{{ url_for('cart') }}">Cart 🛒</a>
+    <a href="{{ url_for('cart') }}"
+       class="{{ 'active' if request.endpoint == 'cart' else '' }}"
+       {% if request.endpoint == 'cart' %}aria-current="page"{% endif %}>
+        Cart 🛒
+    </a>
 
-            {% if session.get('user') %}
-                <a href="{{ url_for('logout') }}" class="login-btn">
-                    Logout
-                </a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="login-btn">
-                    Login
-                </a>
-            {% endif %}
-        </nav>
+    {% if session.get('user') %}
+        <a href="{{ url_for('logout') }}" class="login-btn">
+            Logout
+        </a>
+    {% else %}
+        <a href="{{ url_for('login') }}"
+           class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+            Login
+        </a>
+    {% endif %}
+</nav>
 
     </header>
 

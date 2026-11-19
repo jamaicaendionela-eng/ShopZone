@@ -1184,3 +1184,27 @@ footer p {
         animation-duration: 0.01ms !important;
     }
 }
+
+
+
+/* ACTIVE NAVBAR LINK */
+
+.navbar nav a.active {
+    color: #c084fc;
+    position: relative;
+}
+
+.navbar nav a.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -9px;
+    width: 100%;
+    height: 3px;
+    background: #a855f7;
+    border-radius: 5px;
+}
+
+.navbar nav a.active:hover {
+    color: #d8b4fe;
+}

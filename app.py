@@ -614,6 +614,117 @@ def trust_profile():
         error=request.args.get("error") or error
     )
 
+
+# =========================================================
+# EDIT CUSTOMER REVIEW
+# =========================================================
+
+@app.route(
+    "/trust-profile/review/<int:review_id>/edit",
+    methods=["POST"]
+)
+def edit_trust_review(review_id):
+
+    user = session.get("user")
+
+    if not user:
+        return redirect(url_for("login"))
+
+    rating = request.form.get("rating", "").strip()
+    review = request.form.get("review", "").strip()
+
+    try:
+        rating = int(rating)
+
+    except (TypeError, ValueError):
+        return redirect(
+            url_for("trust_profile", error="invalid")
+        )
+
+    if rating < 1 or rating > 5 or not review:
+        return redirect(
+            url_for("trust_profile", error="invalid")
+        )
+
+    if len(review) > 1000:
+        return redirect(
+            url_for("trust_profile", error="too_long")
+        )
+
+    try:
+        # Update only the review owned by the logged-in user.
+        response = (
+            supabase
+            .table("store_reviews")
+            .update({
+                "rating": rating,
+                "review": review
+            })
+            .eq("id", review_id)
+            .eq("user_id", user["id"])
+            .execute()
+        )
+
+        if not response.data:
+            return redirect(
+                url_for("trust_profile", error="edit_failed")
+            )
+
+        return redirect(
+            url_for("trust_profile", updated_review="1")
+        )
+
+    except Exception as e:
+        print("Trust review edit error:", e)
+
+        return redirect(
+            url_for("trust_profile", error="edit_failed")
+        )
+
+
+# =========================================================
+# DELETE CUSTOMER REVIEW
+# =========================================================
+
+@app.route(
+    "/trust-profile/review/<int:review_id>/delete",
+    methods=["POST"]
+)
+def delete_trust_review(review_id):
+
+    user = session.get("user")
+
+    if not user:
+        return redirect(url_for("login"))
+
+    try:
+        # Delete only the review owned by the logged-in user.
+        response = (
+            supabase
+            .table("store_reviews")
+            .delete()
+            .eq("id", review_id)
+            .eq("user_id", user["id"])
+            .execute()
+        )
+
+        if not response.data:
+            return redirect(
+                url_for("trust_profile", error="delete_failed")
+            )
+
+        return redirect(
+            url_for("trust_profile", deleted_review="1")
+        )
+
+    except Exception as e:
+        print("Trust review delete error:", e)
+
+        return redirect(
+            url_for("trust_profile", error="delete_failed")
+        )
+
+
 # =========================================================
 # PRODUCTS
 # =========================================================
@@ -1720,53 +1831,34 @@ def bundle_builder():
 # CHECKOUT
 # =========================================================
 
-@app.route(
-    "/checkout",
-    methods=["GET", "POST"]
-)
+@app.route("/checkout", methods=["GET", "POST"])
 def checkout():
 
+    if not session.get("user"):
+        return redirect(url_for("login"))
+
+    user_id = session["user"]["id"]
+
     cart_items = []
+    cart = session.get("cart", {})
 
-    cart = session.get(
-        "cart",
-        {}
-    )
-
-    # Build cart items.
+    # BUILD CART ITEMS
     for product_id, quantity in cart.items():
 
         product_id = int(product_id)
-
-        product = get_product(
-            product_id
-        )
+        product = get_product(product_id)
 
         if product:
-
             item = product.copy()
-
             item["id"] = product_id
             item["quantity"] = quantity
-            item["subtotal"] = (
-                product["price"] * quantity
-            )
-
+            item["subtotal"] = product["price"] * quantity
             cart_items.append(item)
 
-    cart_total = sum(
-        item["subtotal"]
-        for item in cart_items
-    )
+    cart_total = sum(item["subtotal"] for item in cart_items)
+    cart_count = sum(item["quantity"] for item in cart_items)
 
-    cart_count = sum(
-        item["quantity"]
-        for item in cart_items
-    )
-
-    # Empty cart.
     if not cart_items:
-
         return render_template(
             "checkout.html",
             cart_items=[],
@@ -1775,71 +1867,100 @@ def checkout():
             error="Your cart is empty."
         )
 
-    # Place order.
+    # LOAD CUSTOMER PROFILE
+    try:
+        profile_response = (
+            supabase
+            .table("users")
+            .select(
+                "id, name, email, phone, address_line, "
+                "barangay, city, province, postal_code"
+            )
+            .eq("id", user_id)
+            .limit(1)
+            .execute()
+        )
+
+        customer = (
+            profile_response.data[0]
+            if profile_response.data
+            else None
+        )
+
+        if not customer:
+            raise Exception("Customer profile not found.")
+
+    except Exception as e:
+        print("Checkout profile loading error:", e)
+
+        return render_template(
+            "checkout.html",
+            cart_items=cart_items,
+            cart_total=cart_total,
+            cart_count=cart_count,
+            error="Unable to load your profile. Please try again."
+        )
+
+    # BUILD COMPLETE DELIVERY ADDRESS
+    address_parts = [
+        customer.get("address_line"),
+        customer.get("barangay"),
+        customer.get("city"),
+        customer.get("province"),
+        customer.get("postal_code")
+    ]
+
+    delivery_address = ", ".join(
+        str(part).strip()
+        for part in address_parts
+        if part and str(part).strip()
+    )
+
+    customer_info = {
+        "full_name": customer.get("name") or "",
+        "email": customer.get("email") or "",
+        "phone": customer.get("phone") or "",
+        "address": delivery_address
+    }
+
+    # PLACE ORDER
     if request.method == "POST":
 
-        full_name = request.form.get(
-            "full_name",
-            ""
-        ).strip()
-
-        email = request.form.get(
-            "email",
-            ""
-        ).strip().lower()
-
-        phone = request.form.get(
-            "phone",
-            ""
-        ).strip()
-
-        address = request.form.get(
-            "address",
-            ""
-        ).strip()
-
         payment_method = request.form.get(
-            "payment_method",
-            ""
+            "payment_method", ""
         ).strip()
 
-        if (
-            not full_name
-            or not email
-            or not phone
-            or not address
-            or not payment_method
-        ):
-
-            error = (
-                "Please fill in all required fields."
-            )
-
+        if not all(customer_info.values()):
             return render_template(
                 "checkout.html",
                 cart_items=cart_items,
                 cart_total=cart_total,
                 cart_count=cart_count,
-                error=error
+                customer=customer_info,
+                error=(
+                    "Please complete your personal information "
+                    "and delivery address in My Profile first."
+                )
             )
 
-        user_id = None
-
-        if session.get("user"):
-
-            user_id = session[
-                "user"
-            ].get("id")
+        if payment_method not in ["Cash on Delivery", "GCash"]:
+            return render_template(
+                "checkout.html",
+                cart_items=cart_items,
+                cart_total=cart_total,
+                cart_count=cart_count,
+                customer=customer_info,
+                error="Please select a valid payment method."
+            )
 
         try:
 
-            # Insert order.
             order_data = {
                 "user_id": user_id,
-                "full_name": full_name,
-                "email": email,
-                "phone": phone,
-                "address": address,
+                "full_name": customer_info["full_name"],
+                "email": customer_info["email"],
+                "phone": customer_info["phone"],
+                "address": customer_info["address"],
                 "payment_method": payment_method,
                 "total": cart_total,
                 "status": "Pending"
@@ -1853,21 +1974,13 @@ def checkout():
             )
 
             if not order_response.data:
+                raise Exception("Order was not created.")
 
-                raise Exception(
-                    "Order was not created."
-                )
+            order_id = order_response.data[0]["id"]
 
-            order_id = (
-                order_response
-                .data[0]["id"]
-            )
-
-            # Insert order items.
             order_items = []
 
             for item in cart_items:
-
                 order_items.append({
                     "order_id": order_id,
                     "product_id": item["id"],
@@ -1884,45 +1997,33 @@ def checkout():
                 .execute()
             )
 
-            # Clear cart.
-            session.pop(
-                "cart",
-                None
-            )
+            session.pop("cart", None)
+            session["last_order_id"] = order_id
 
-            session["last_order_id"] = (
-                order_id
-            )
-
-            return redirect(
-                url_for("orders")
-            )
+            return redirect(url_for("orders"))
 
         except Exception as e:
 
-            print(
-                "Checkout database error:",
-                e
-            )
-
-            error = (
-                "Unable to place your order. "
-                "Please try again."
-            )
+            print("Checkout database error:", e)
 
             return render_template(
                 "checkout.html",
                 cart_items=cart_items,
                 cart_total=cart_total,
                 cart_count=cart_count,
-                error=error
+                customer=customer_info,
+                error=(
+                    "Unable to place your order. "
+                    "Please try again."
+                )
             )
 
     return render_template(
         "checkout.html",
         cart_items=cart_items,
         cart_total=cart_total,
-        cart_count=cart_count
+        cart_count=cart_count,
+        customer=customer_info
     )
 
 
@@ -1933,91 +2034,57 @@ def checkout():
 @app.route("/orders")
 def orders():
 
-    orders_list = []
+    # REQUIRE LOGIN
+    if not session.get("user"):
+        return redirect(url_for("login"))
 
+    orders_list = []
     error = ""
+
+    user_id = session["user"]["id"]
 
     try:
 
-        user = session.get(
-            "user"
+        # GET ONLY THE LOGGED-IN USER'S ORDERS
+        response = (
+            supabase
+            .table("orders")
+            .select("*")
+            .eq("user_id", user_id)
+            .order("created_at", desc=False)
+            .execute()
         )
 
-        # Logged-in user.
-        if user:
+        user_orders = response.data or []
 
-            response = (
+        # ASSIGN ORDER NUMBER PER USER
+        for index, order in enumerate(user_orders, start=1):
+
+            order["display_order_number"] = index
+
+            # GET ORDER ITEMS
+            items_response = (
                 supabase
-                .table("orders")
+                .table("order_items")
                 .select("*")
-                .eq(
-                    "user_id",
-                    user["id"]
-                )
-                .order(
-                    "created_at",
-                    desc=True
-                )
+                .eq("order_id", order["id"])
                 .execute()
             )
 
-        # Guest user.
-        else:
-
-            last_order_id = session.get(
-                "last_order_id"
+            order["items"] = (
+                items_response.data
+                if items_response.data
+                else []
             )
 
-            if last_order_id:
+            orders_list.append(order)
 
-                response = (
-                    supabase
-                    .table("orders")
-                    .select("*")
-                    .eq(
-                        "id",
-                        last_order_id
-                    )
-                    .limit(1)
-                    .execute()
-                )
-
-            else:
-
-                response = None
-
-        # Process orders.
-        if response and response.data:
-
-            for order in response.data:
-
-                items_response = (
-                    supabase
-                    .table("order_items")
-                    .select("*")
-                    .eq(
-                        "order_id",
-                        order["id"]
-                    )
-                    .execute()
-                )
-
-                order["items"] = (
-                    items_response.data
-                    if items_response.data
-                    else []
-                )
-
-                orders_list.append(
-                    order
-                )
+        # DISPLAY NEWEST ORDERS FIRST
+        orders_list.reverse()
 
     except Exception as e:
 
-        print(
-            "Orders database error:",
-            e
-        )
+        print("Orders database error:", e)
 
         error = (
             "Unable to load your orders. "

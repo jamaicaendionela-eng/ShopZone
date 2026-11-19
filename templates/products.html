@@ -11,136 +11,6 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/products.css') }}">
 
-    <style>
-        .cart-link {
-            position: relative;
-        }
-
-        .cart-notification {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            width: 9px;
-            height: 9px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2px solid white;
-            display: block;
-        }
-
-        .add-cart-button {
-            position: relative;
-        }
-
-        .add-cart-button.added {
-            background: #16a34a;
-        }
-
-        /* COMPARE BUTTON */
-
-        .compare-button {
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #2563eb;
-            border-radius: 7px;
-            background: white;
-            color: #2563eb;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .compare-button:hover {
-            background: #eff6ff;
-        }
-
-        .compare-button.selected {
-            background: #2563eb;
-            color: white;
-        }
-
-        .compare-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* COMPARE SELECTION BAR */
-        .compare-bar {
-            display: none;
-            position: sticky;
-            bottom: 15px;
-            z-index: 100;
-            max-width: 900px;
-            margin: 25px auto 0;
-            padding: 16px 20px;
-            background: white;
-            border: 1px solid #dbeafe;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .compare-bar.visible {
-            display: flex;
-        }
-
-        .compare-status {
-            color: #374151;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .compare-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .compare-actions button {
-            padding: 10px 14px;
-            border-radius: 7px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .clear-compare-button {
-            background: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-
-        .open-compare-button {
-            background: #2563eb;
-            color: white;
-            border: 1px solid #2563eb;
-        }
-
-        .open-compare-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        @media (max-width: 600px) {
-            .compare-bar {
-                bottom: 8px;
-                margin-top: 20px;
-                padding: 14px;
-            }
-
-            .compare-actions {
-                width: 100%;
-            }
-
-            .compare-actions button {
-                flex: 1;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -152,43 +22,70 @@
             🛒 ShopZone
         </div>
 
-        <nav>
+       
+<nav>
 
-            <a href="{{ url_for('home') }}">Home</a>
+    <a href="{{ url_for('home') }}"
+       class="{{ 'active' if request.endpoint == 'home' else '' }}">
+        Home
+    </a>
 
-            <a href="{{ url_for('categories_page') }}">Categories</a>
+    <a href="{{ url_for('categories_page') }}"
+       class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
+        Categories
+    </a>
 
-            <a href="{{ url_for('products_page') }}">Products</a>
+    <a href="{{ url_for('products_page') }}"
+       class="active"
+       aria-current="page">
+        Products
+    </a>
 
-            <a href="{{ url_for('budget_planner') }}">
-                Budget Planner
-            </a>
+    <a href="{{ url_for('budget_planner') }}"
+       class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
+        Budget Planner
+    </a>
 
-            <a href="{{ url_for('bundle_builder') }}">
-                Bundle Builder
-            </a>
+    <a href="{{ url_for('bundle_builder') }}"
+       class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
+        Bundle Builder
+    </a>
 
-            {% if session.get('user') %}
-                <a href="{{ url_for('trust_profile') }}">
-                    Trust Profile
-                </a>
-            {% endif %}
+    {% if session.get('user') %}
+        <a href="{{ url_for('trust_profile') }}"
+           class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
+            Trust Profile
+        </a>
+    {% endif %}
 
-            <a href="{{ url_for('profile') }}">My Profile</a>
+    <a href="{{ url_for('profile') }}"
+       class="{{ 'active' if request.endpoint == 'profile' else '' }}">
+        My Profile
+    </a>
 
-            <a href="{{ url_for('cart') }}">Cart 🛒</a>
+    <a href="{{ url_for('cart') }}"
+       class="{{ 'active' if request.endpoint == 'cart' else '' }}">
+        Cart 🛒
+    </a>
 
-            {% if session.get('user') %}
-                <a href="{{ url_for('logout') }}" class="login-btn">
-                    Logout
-                </a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="login-btn">
-                    Login
-                </a>
-            {% endif %}
+    <a href="{{ url_for('orders') }}"
+       class="{{ 'active' if request.endpoint == 'orders' else '' }}">
+        Orders
+    </a>
 
-        </nav>
+    {% if session.get('user') %}
+        <a href="{{ url_for('logout') }}" class="login-btn">
+            Logout
+        </a>
+    {% else %}
+        <a href="{{ url_for('login') }}"
+           class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+            Login
+        </a>
+    {% endif %}
+
+</nav>
+
 
     </header>
     <!-- PAGE HEADER -->
