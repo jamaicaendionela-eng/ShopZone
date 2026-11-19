@@ -65,101 +65,6 @@ a:focus-visible {
 }
 
 /* =========================================
-   NAVBAR - SAME AS SHOPZONE MAIN PAGES
-========================================= */
-
-.navbar {
-    min-height: 75px;
-    padding: 0 7%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(8, 5, 13, 0.90);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--bp-border);
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.35);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.navbar .logo {
-    font-size: 25px;
-    font-weight: 800;
-    letter-spacing: -0.8px;
-    background: linear-gradient(135deg, #c084fc, #9333ea);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    white-space: nowrap;
-}
-
-.navbar nav {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.navbar nav a {
-    position: relative;
-    text-decoration: none;
-    color: #c4b5d5;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 10px 14px;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-.navbar nav a:hover {
-    color: #ffffff;
-    background: rgba(139, 92, 246, 0.20);
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.12);
-    transform: translateY(-2px);
-}
-
-.navbar nav a.active,
-.navbar nav a[aria-current="page"] {
-    color: #ffffff;
-    background: linear-gradient(
-        135deg,
-        rgba(109, 40, 217, 0.40),
-        rgba(167, 139, 250, 0.18)
-    );
-    border: 1px solid rgba(196, 181, 253, 0.20);
-    font-weight: 700;
-}
-
-.navbar nav .cart-link {
-    position: relative;
-}
-
-.navbar nav .cart-notification {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 9px;
-    height: 9px;
-    background: #fb7185;
-    border-radius: 50%;
-    border: 2px solid #130d20;
-}
-
-.navbar nav a.login-btn {
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    color: #ffffff;
-    padding: 10px 16px;
-    border: 1px solid #a855f7;
-}
-
-.navbar nav a.login-btn:hover {
-    background: linear-gradient(135deg, #6d28d9, #9333ea);
-    color: #ffffff;
-}
-
-/* =========================================
    MAIN CONTAINER
 ========================================= */
 
@@ -778,16 +683,6 @@ footer p {
 ========================================= */
 
 @media (max-width: 900px) {
-    .navbar {
-        padding: 16px 20px;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .navbar nav {
-        justify-content: center;
-    }
-
     .product-grid,
     .alternatives-container {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -803,20 +698,6 @@ footer p {
 }
 
 @media (max-width: 650px) {
-    .navbar {
-        padding: 14px 10px;
-    }
-
-    .navbar nav {
-        gap: 4px;
-        justify-content: center;
-    }
-
-    .navbar nav a {
-        padding: 8px;
-        font-size: 12px;
-    }
-
     .planner-container {
         width: 92%;
         padding-top: 25px;

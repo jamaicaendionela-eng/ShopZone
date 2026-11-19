@@ -7,6 +7,11 @@
 
     <title>Trust Profile | ShopZone</title>
 
+    <!-- SHARED NAVBAR CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- PAGE-SPECIFIC CSS -->
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/trust_profile.css') }}">
 </head>
@@ -20,69 +25,63 @@
             🛒 ShopZone
         </div>
 
-        
-<nav>
+        <nav>
 
-    <a href="{{ url_for('home') }}"
-       class="{{ 'active' if request.endpoint == 'home' else '' }}">
-        Home
-    </a>
+            <a href="{{ url_for('home') }}"
+               class="{{ 'active' if request.endpoint == 'home' else '' }}">
+                Home
+            </a>
 
-    <a href="{{ url_for('categories_page') }}"
-       class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
-        Categories
-    </a>
+            <a href="{{ url_for('categories_page') }}"
+               class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
+                Categories
+            </a>
 
-    <a href="{{ url_for('products_page') }}"
-       class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}">
-        Products
-    </a>
+            <a href="{{ url_for('products_page') }}"
+               class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}">
+                Products
+            </a>
 
-    <a href="{{ url_for('budget_planner') }}"
-       class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
-        Budget Planner
-    </a>
+            <a href="{{ url_for('budget_planner') }}"
+               class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
+                Budget Planner
+            </a>
 
-    <a href="{{ url_for('bundle_builder') }}"
-       class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
-        Bundle Builder
-    </a>
+            <a href="{{ url_for('bundle_builder') }}"
+               class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
+                Bundle Builder
+            </a>
 
-    {% if session.get('user') %}
-        <a href="{{ url_for('trust_profile') }}"
-           class="active"
-           aria-current="page">
-            Trust Profile
-        </a>
-    {% endif %}
+            {% if session.get('user') %}
+            <a href="{{ url_for('trust_profile') }}"
+               class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}"
+               {% if request.endpoint == 'trust_profile' %}aria-current="page"{% endif %}>
+                Trust Profile
+            </a>
+            {% endif %}
 
-    <a href="{{ url_for('profile') }}"
-       class="{{ 'active' if request.endpoint == 'profile' else '' }}">
-        My Profile
-    </a>
+            <a href="{{ url_for('profile') }}"
+               class="{{ 'active' if request.endpoint == 'profile' else '' }}">
+                My Profile
+            </a>
 
-    <a href="{{ url_for('cart') }}"
-       class="{{ 'active' if request.endpoint == 'cart' else '' }}">
-        Cart 🛒
-    </a>
+            <a href="{{ url_for('cart') }}"
+               class="{{ 'active' if request.endpoint in ['cart', 'checkout'] else '' }}">
+                Cart 🛒
+            </a>
 
-    <a href="{{ url_for('orders') }}"
-       class="{{ 'active' if request.endpoint == 'orders' else '' }}">
-        Orders
-    </a>
+            {% if session.get('user') %}
+            <a href="{{ url_for('logout') }}" class="login-btn">
+                Logout
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}"
+               class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+                Login
+            </a>
+            {% endif %}
 
-    {% if session.get('user') %}
-        <a href="{{ url_for('logout') }}" class="login-btn">
-            Logout
-        </a>
-    {% else %}
-        <a href="{{ url_for('login') }}"
-           class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
-            Login
-        </a>
-    {% endif %}
-
-</nav>
+        </nav>
 
     </header>
 
@@ -107,58 +106,58 @@
         <!-- SUCCESS MESSAGES -->
 
         {% if submitted %}
-            <div class="alert success">
-                Your review has been submitted successfully. Thank you!
-            </div>
+        <div class="alert success">
+            Your review has been submitted successfully. Thank you!
+        </div>
         {% endif %}
 
         {% if request.args.get('updated_review') == '1' %}
-            <div class="alert success">
-                Your review has been updated successfully.
-            </div>
+        <div class="alert success">
+            Your review has been updated successfully.
+        </div>
         {% endif %}
 
         {% if request.args.get('deleted_review') == '1' %}
-            <div class="alert success">
-                Your review has been deleted successfully.
-            </div>
+        <div class="alert success">
+            Your review has been deleted successfully.
+        </div>
         {% endif %}
 
 
         <!-- ERROR MESSAGES -->
 
         {% if error %}
-            <div class="alert error">
+        <div class="alert error">
 
-                {% if error == "required" %}
-                    Please complete all review fields.
+            {% if error == "required" %}
+                Please complete all review fields.
 
-                {% elif error == "invalid" %}
-                    Invalid review information. Please try again.
+            {% elif error == "invalid" %}
+                Invalid review information. Please try again.
 
-                {% elif error == "too_long" %}
-                    Your review must not exceed 1,000 characters.
+            {% elif error == "too_long" %}
+                Your review must not exceed 1,000 characters.
 
-                {% elif error == "not_eligible" %}
-                    Only your delivered orders can be reviewed.
+            {% elif error == "not_eligible" %}
+                Only your delivered orders can be reviewed.
 
-                {% elif error == "duplicate" %}
-                    You have already reviewed this order.
+            {% elif error == "duplicate" %}
+                You have already reviewed this order.
 
-                {% elif error == "submit_failed" %}
-                    Unable to submit your review. Please try again.
+            {% elif error == "submit_failed" %}
+                Unable to submit your review. Please try again.
 
-                {% elif error == "edit_failed" %}
-                    Unable to update your review. Please try again.
+            {% elif error == "edit_failed" %}
+                Unable to update your review. Please try again.
 
-                {% elif error == "delete_failed" %}
-                    Unable to delete your review. Please try again.
+            {% elif error == "delete_failed" %}
+                Unable to delete your review. Please try again.
 
-                {% else %}
-                    {{ error }}
-                {% endif %}
+            {% else %}
+                {{ error }}
+            {% endif %}
 
-            </div>
+        </div>
         {% endif %}
 
 
@@ -174,21 +173,21 @@
 
                 {% if trust_score is not none %}
 
-                    <h2>
-                        {{ trust_score }}<small>/100</small>
-                    </h2>
+                <h2>
+                    {{ trust_score }}<small>/100</small>
+                </h2>
 
-                    <p>
-                        Based on order completion and customer satisfaction.
-                    </p>
+                <p>
+                    Based on order completion and customer satisfaction.
+                </p>
 
                 {% else %}
 
-                    <h2>--<small>/100</small></h2>
+                <h2>--<small>/100</small></h2>
 
-                    <p>
-                        Customer reviews are needed to calculate the trust score.
-                    </p>
+                <p>
+                    Customer reviews are needed to calculate the trust score.
+                </p>
 
                 {% endif %}
 
@@ -259,200 +258,198 @@
 
             {% if reviews %}
 
-                <div class="reviews-grid">
+            <div class="reviews-grid">
 
-                    {% for review in reviews %}
+                {% for review in reviews %}
 
-                        <article class="review-card">
+                <article class="review-card">
 
-                            <!-- REVIEWER INFORMATION -->
+                    <!-- REVIEWER INFORMATION -->
 
-                            <div class="review-top">
+                    <div class="review-top">
 
-                                <div class="reviewer-avatar">
-                                    {{ review.reviewer_name[0]|upper if review.reviewer_name else "C" }}
-                                </div>
+                        <div class="reviewer-avatar">
+                            {{ review.reviewer_name[0]|upper if review.reviewer_name else "C" }}
+                        </div>
 
-                                <div class="reviewer-info">
+                        <div class="reviewer-info">
 
-                                    <h3>
-                                        {{ review.reviewer_name }}
-                                    </h3>
+                            <h3>{{ review.reviewer_name }}</h3>
 
-                                    <span>Verified Purchase</span>
+                            <span>Verified Purchase</span>
 
-                                </div>
+                        </div>
 
-                            </div>
+                    </div>
 
 
-                            <!-- STAR RATING -->
+                    <!-- STAR RATING -->
 
-                            <div class="stars">
+                    <div class="stars">
 
-                                {% for star in range(5) %}
+                        {% for star in range(5) %}
 
-                                    {% if star < review.rating|int %}
-                                        ★
-                                    {% else %}
-                                        ☆
-                                    {% endif %}
-
-                                {% endfor %}
-
-                            </div>
-
-
-                            <!-- REVIEW COMMENT -->
-
-                            <p class="review-text">
-                                {{ review.review }}
-                            </p>
-
-
-                            <!-- REVIEW DATE -->
-
-                            <span class="review-date">
-                                {{ review.created_at[:10] if review.created_at else "" }}
-                            </span>
-
-
-                            <!-- OWNER CONTROLS -->
-
-                            {% if session.get('user') and session.get('user').get('id')|string == review.user_id|string %}
-
-                                <div class="review-actions">
-
-                                    <details class="edit-review-details">
-
-                                        <summary class="edit-review-btn">
-                                            ✏️ Edit Review
-                                        </summary>
-
-                                        <form
-                                            action="{{ url_for('edit_trust_review', review_id=review.id) }}"
-                                            method="POST"
-                                            class="edit-review-form"
-                                        >
-
-                                            <label for="rating-{{ review.id }}">
-                                                Update Rating
-                                            </label>
-
-                                            <select
-                                                name="rating"
-                                                id="rating-{{ review.id }}"
-                                                required
-                                            >
-
-                                                <option value="5"
-                                                    {% if review.rating|int == 5 %}selected{% endif %}>
-                                                    ★★★★★ - Excellent
-                                                </option>
-
-                                                <option value="4"
-                                                    {% if review.rating|int == 4 %}selected{% endif %}>
-                                                    ★★★★ - Very Good
-                                                </option>
-
-                                                <option value="3"
-                                                    {% if review.rating|int == 3 %}selected{% endif %}>
-                                                    ★★★ - Good
-                                                </option>
-
-                                                <option value="2"
-                                                    {% if review.rating|int == 2 %}selected{% endif %}>
-                                                    ★★ - Fair
-                                                </option>
-
-                                                <option value="1"
-                                                    {% if review.rating|int == 1 %}selected{% endif %}>
-                                                    ★ - Poor
-                                                </option>
-
-                                            </select>
-
-
-                                            <label for="review-{{ review.id }}">
-                                                Update Review
-                                            </label>
-
-                                            <textarea
-                                                name="review"
-                                                id="review-{{ review.id }}"
-                                                rows="4"
-                                                maxlength="1000"
-                                                required
-                                            >{{ review.review }}</textarea>
-
-
-                                            <div class="edit-review-buttons">
-
-                                                <button
-                                                    type="submit"
-                                                    class="save-review-btn"
-                                                >
-                                                    Save Changes
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    class="cancel-review-btn"
-                                                    onclick="this.closest('details').open = false"
-                                                >
-                                                    Cancel
-                                                </button>
-
-                                            </div>
-
-                                        </form>
-
-                                    </details>
-
-
-                                    <!-- DELETE REVIEW -->
-
-                                    <form
-                                        action="{{ url_for('delete_trust_review', review_id=review.id) }}"
-                                        method="POST"
-                                        class="delete-review-form"
-                                        onsubmit="return confirm('Are you sure you want to permanently delete this review?');"
-                                    >
-
-                                        <button
-                                            type="submit"
-                                            class="delete-review-btn"
-                                        >
-                                            🗑 Delete
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
+                            {% if star < review.rating|int %}
+                                ★
+                            {% else %}
+                                ☆
                             {% endif %}
 
-                        </article>
+                        {% endfor %}
 
-                    {% endfor %}
+                    </div>
 
-                </div>
+
+                    <!-- REVIEW COMMENT -->
+
+                    <p class="review-text">
+                        {{ review.review }}
+                    </p>
+
+
+                    <!-- REVIEW DATE -->
+
+                    <span class="review-date">
+                        {{ review.created_at[:10] if review.created_at else "" }}
+                    </span>
+
+
+                    <!-- OWNER CONTROLS -->
+
+                    {% if session.get('user') and session.get('user').get('id')|string == review.user_id|string %}
+
+                    <div class="review-actions">
+
+                        <details class="edit-review-details">
+
+                            <summary class="edit-review-btn">
+                                ✏️ Edit Review
+                            </summary>
+
+                            <form
+                                action="{{ url_for('edit_trust_review', review_id=review.id) }}"
+                                method="POST"
+                                class="edit-review-form"
+                            >
+
+                                <label for="rating-{{ review.id }}">
+                                    Update Rating
+                                </label>
+
+                                <select
+                                    name="rating"
+                                    id="rating-{{ review.id }}"
+                                    required
+                                >
+
+                                    <option value="5"
+                                        {% if review.rating|int == 5 %}selected{% endif %}>
+                                        ★★★★★ - Excellent
+                                    </option>
+
+                                    <option value="4"
+                                        {% if review.rating|int == 4 %}selected{% endif %}>
+                                        ★★★★ - Very Good
+                                    </option>
+
+                                    <option value="3"
+                                        {% if review.rating|int == 3 %}selected{% endif %}>
+                                        ★★★ - Good
+                                    </option>
+
+                                    <option value="2"
+                                        {% if review.rating|int == 2 %}selected{% endif %}>
+                                        ★★ - Fair
+                                    </option>
+
+                                    <option value="1"
+                                        {% if review.rating|int == 1 %}selected{% endif %}>
+                                        ★ - Poor
+                                    </option>
+
+                                </select>
+
+
+                                <label for="review-{{ review.id }}">
+                                    Update Review
+                                </label>
+
+                                <textarea
+                                    name="review"
+                                    id="review-{{ review.id }}"
+                                    rows="4"
+                                    maxlength="1000"
+                                    required
+                                >{{ review.review }}</textarea>
+
+
+                                <div class="edit-review-buttons">
+
+                                    <button
+                                        type="submit"
+                                        class="save-review-btn"
+                                    >
+                                        Save Changes
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="cancel-review-btn"
+                                        onclick="this.closest('details').open = false"
+                                    >
+                                        Cancel
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </details>
+
+
+                        <!-- DELETE REVIEW -->
+
+                        <form
+                            action="{{ url_for('delete_trust_review', review_id=review.id) }}"
+                            method="POST"
+                            class="delete-review-form"
+                            onsubmit="return confirm('Are you sure you want to permanently delete this review?');"
+                        >
+
+                            <button
+                                type="submit"
+                                class="delete-review-btn"
+                            >
+                                🗑 Delete
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                    {% endif %}
+
+                </article>
+
+                {% endfor %}
+
+            </div>
 
 
             {% else %}
 
-                <div class="empty-state">
+            <div class="empty-state">
 
-                    <div class="empty-icon">⭐</div>
+                <div class="empty-icon">⭐</div>
 
-                    <h3>No Reviews Yet</h3>
+                <h3>No Reviews Yet</h3>
 
-                    <p>
-                        Customer reviews will appear here after
-                        successful review submissions.
-                    </p>
+                <p>
+                    Customer reviews will appear here after
+                    successful review submissions.
+                </p>
 
-                </div>
+            </div>
 
             {% endif %}
 
@@ -482,95 +479,95 @@
 
             {% if available_orders %}
 
-                <form
-                    action="{{ url_for('trust_profile') }}"
-                    method="POST"
-                    class="review-form"
-                >
+            <form
+                action="{{ url_for('trust_profile') }}"
+                method="POST"
+                class="review-form"
+            >
 
-                    <label for="order_id">
-                        Select Delivered Order
-                    </label>
+                <label for="order_id">
+                    Select Delivered Order
+                </label>
 
-                    <select name="order_id" id="order_id" required>
+                <select name="order_id" id="order_id" required>
 
-                        <option value="">
-                            Choose an order
-                        </option>
+                    <option value="">
+                        Choose an order
+                    </option>
 
-                        {% for order in available_orders %}
+                    {% for order in available_orders %}
 
-                            <option value="{{ order.id }}">
+                    <option value="{{ order.id }}">
 
-                                Order #{{ order.id }}
+                        Order #{{ order.id }}
 
-                                {% if order.created_at %}
-                                    - {{ order.created_at[:10] }}
-                                {% endif %}
+                        {% if order.created_at %}
+                            - {{ order.created_at[:10] }}
+                        {% endif %}
 
-                            </option>
+                    </option>
 
-                        {% endfor %}
+                    {% endfor %}
 
-                    </select>
-
-
-                    <label for="rating">
-                        Your Rating
-                    </label>
-
-                    <select name="rating" id="rating" required>
-
-                        <option value="">
-                            Select a rating
-                        </option>
-
-                        <option value="5">★★★★★ - Excellent</option>
-                        <option value="4">★★★★ - Very Good</option>
-                        <option value="3">★★★ - Good</option>
-                        <option value="2">★★ - Fair</option>
-                        <option value="1">★ - Poor</option>
-
-                    </select>
+                </select>
 
 
-                    <label for="review">
-                        Your Review
-                    </label>
+                <label for="rating">
+                    Your Rating
+                </label>
 
-                    <textarea
-                        name="review"
-                        id="review"
-                        rows="5"
-                        maxlength="1000"
-                        placeholder="Share your experience with ShopZone..."
-                        required
-                    ></textarea>
+                <select name="rating" id="rating" required>
+
+                    <option value="">
+                        Select a rating
+                    </option>
+
+                    <option value="5">★★★★★ - Excellent</option>
+                    <option value="4">★★★★ - Very Good</option>
+                    <option value="3">★★★ - Good</option>
+                    <option value="2">★★ - Fair</option>
+                    <option value="1">★ - Poor</option>
+
+                </select>
 
 
-                    <button type="submit" class="submit-btn">
-                        Submit Review
-                    </button>
+                <label for="review">
+                    Your Review
+                </label>
 
-                </form>
+                <textarea
+                    name="review"
+                    id="review"
+                    rows="5"
+                    maxlength="1000"
+                    placeholder="Share your experience with ShopZone..."
+                    required
+                ></textarea>
+
+
+                <button type="submit" class="submit-btn">
+                    Submit Review
+                </button>
+
+            </form>
 
 
             {% else %}
 
-                <div class="empty-state">
+            <div class="empty-state">
 
-                    <h3>No Eligible Orders</h3>
+                <h3>No Eligible Orders</h3>
 
-                    <p>
-                        You need a delivered order that has not yet been
-                        reviewed before you can submit feedback.
-                    </p>
+                <p>
+                    You need a delivered order that has not yet been
+                    reviewed before you can submit feedback.
+                </p>
 
-                    <a href="{{ url_for('orders') }}" class="secondary-btn">
-                        View My Orders
-                    </a>
+                <a href="{{ url_for('orders') }}" class="secondary-btn">
+                    View My Orders
+                </a>
 
-                </div>
+            </div>
 
             {% endif %}
 

@@ -8,7 +8,10 @@
     <title>Smart Bundle Builder | ShopZone</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/bundle_builder.css') }}">
+      href="{{ url_for('static', filename='css/style.css') }}">
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/bundle_builder.css') }}">
 </head>
 
 <body>
@@ -44,11 +47,10 @@
         Budget Planner
     </a>
 
-    <a href="{{ url_for('bundle_builder') }}"
-       class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}"
-       aria-current="page">
-        Bundle Builder
-    </a>
+ <a href="{{ url_for('bundle_builder') }}"
+   class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
+    Bundle Builder
+</a>
 
     {% if session.get('user') %}
         <a href="{{ url_for('trust_profile') }}"
@@ -335,17 +337,9 @@
 
         </aside>
 
-    </main>
+     </main>
 
-
-    <footer class="footer">
-        <p>2026 ShopZone. Shop smart, spend wisely.</p>
-    </footer>
-
-    <script src="{{ url_for('static', filename='css/js/bundle_builder.js') }}"></script>
-
-     <!-- FOOTER -->
-
+    <!-- FOOTER -->
     <footer>
 
         <div class="footer-logo">
@@ -362,11 +356,14 @@
 
     </footer>
 
+    <!-- JAVASCRIPT -->
+    <script
+        src="{{ url_for('static', filename='css/js/bundle_builder.js') }}">
+    </script>
 
     <script
         src="{{ url_for('static', filename='css/js/script.js') }}">
     </script>
-
 
 </body>
 </html>

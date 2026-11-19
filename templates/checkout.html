@@ -1,506 +1,483 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Checkout | ShopZone</title>
 
+    <!-- SHARED GLOBAL CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            background: #0b0714;
-            color: #f8fafc;
-            min-height: 100vh;
-        }
-
-        /* NAVBAR */
-
-        .navbar {
-            background: #130d20;
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #38264f;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #c084fc;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: #e2d8ef;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: #c084fc;
-        }
-
-        /* MAIN */
-
-        .checkout-container {
-            max-width: 850px;
-            margin: 45px auto;
-            padding: 0 20px;
-        }
-
-        .page-title {
-            font-size: 32px;
-            margin-bottom: 8px;
-            color: white;
-        }
-
-        .page-subtitle {
-            color: #a99abf;
-            font-size: 14px;
-            margin-bottom: 28px;
-            line-height: 1.6;
-        }
-
-        /* CARDS */
-
-        .checkout-card {
-            background: linear-gradient(145deg, #211631, #151020);
-            padding: 27px;
-            border: 1px solid #38264f;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 22px;
-        }
-
-        .card-heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 22px;
-        }
-
-        .card-heading h2 {
-            font-size: 20px;
-            color: #e9d5ff;
-        }
-
-        /* DELIVERY INFORMATION */
-
-        .delivery-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .info-group {
-            min-width: 0;
-        }
-
-        .info-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .info-label {
-            display: block;
-            color: #a99abf;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 7px;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-        }
-
-        .info-value {
-            color: #ffffff;
-            font-size: 15px;
-            line-height: 1.6;
-            overflow-wrap: anywhere;
-        }
-
-        .address-value {
-            background: #100b19;
-            border: 1px solid #49335f;
-            border-radius: 8px;
-            padding: 13px;
-            color: #e9d5ff;
-            line-height: 1.7;
-        }
-
-        .edit-profile-btn {
-            display: inline-block;
-            padding: 9px 14px;
-            background: rgba(168, 85, 247, 0.12);
-            color: #c084fc;
-            border: 1px solid #6b3c91;
-            border-radius: 7px;
-            font-size: 12px;
-            font-weight: bold;
-            text-decoration: none;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-
-        .edit-profile-btn:hover {
-            background: #7e22ce;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .profile-note {
-            margin-top: 20px;
-            padding: 12px 14px;
-            background: rgba(139, 92, 246, 0.10);
-            border: 1px solid rgba(139, 92, 246, 0.25);
-            border-radius: 8px;
-            color: #c4b5fd;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        /* ORDER SUMMARY */
-
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            padding: 15px 0;
-            border-bottom: 1px solid #38264f;
-        }
-
-        .item-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .item-name {
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: #f8fafc;
-            overflow-wrap: anywhere;
-        }
-
-        .item-details {
-            color: #b6a9ca;
-            font-size: 13px;
-        }
-
-        .item-subtotal {
-            font-weight: bold;
-            color: #d8b4fe;
-            white-space: nowrap;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 18px;
-            font-size: 15px;
-            color: #d6c9e5;
-        }
-
-        .summary-total {
-            font-size: 22px;
-            font-weight: bold;
-            margin-top: 18px;
-            padding-top: 18px;
-            border-top: 2px solid #6b3c91;
-            color: #ffffff;
-        }
-
-        /* PAYMENT */
-
-        .payment-section {
-            margin-top: 25px;
-        }
-
-        .payment-section label {
-            display: block;
-            margin-bottom: 9px;
-            font-size: 13px;
-            font-weight: bold;
-            color: #e9d5ff;
-        }
-
-        .payment-section select {
-            width: 100%;
-            padding: 13px;
-            background: #100b19;
-            color: white;
-            border: 1px solid #49335f;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .payment-section select:focus {
-            border-color: #a855f7;
-            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
-        }
-
-        .payment-section select option {
-            background: #171025;
-            color: white;
-        }
-
-        /* BUTTONS */
-
-        .place-order-btn {
-            width: 100%;
-            margin-top: 22px;
-            padding: 15px;
-            background: linear-gradient(135deg, #a855f7, #7e22ce);
-            color: white;
-            border: none;
-            border-radius: 9px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .place-order-btn:hover {
-            background: linear-gradient(135deg, #c084fc, #9333ea);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(168, 85, 247, 0.25);
-        }
-
-        .back-cart {
-            display: inline-block;
-            margin-top: 20px;
-            color: #c084fc;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .back-cart:hover {
-            color: #e9d5ff;
-            text-decoration: underline;
-        }
-
-        /* ERROR */
-
-        .error-box {
-            background: #3b1423;
-            color: #fda4af;
-            padding: 13px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #9f3454;
-            font-size: 14px;
-        }
-
-        /* EMPTY CART */
-
-        .empty-cart {
-            text-align: center;
-            padding: 40px 20px;
-            color: #b6a9ca;
-        }
-
-        .empty-cart h2 {
-            color: white;
-            margin-bottom: 12px;
-        }
-
-        .empty-cart p {
-            line-height: 1.6;
-        }
-
-        /* FOOTER */
-
-        footer {
-            background: #090610;
-            color: white;
-            text-align: center;
-            padding: 35px 20px;
-            border-top: 1px solid #38264f;
-            margin-top: 55px;
-        }
-
-        .footer-logo {
-            font-size: 25px;
-            font-weight: bold;
-            color: #c084fc;
-            margin-bottom: 12px;
-        }
-
-        footer p {
-            color: #a99abf;
-            margin: 8px;
-            font-size: 13px;
-        }
-
-        .copyright {
-            font-size: 12px;
-            margin-top: 20px !important;
-        }
-
-        /* RESPONSIVE */
-
-        @media (max-width: 700px) {
-
-            .navbar {
-                padding: 16px 20px;
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 14px;
-            }
-
-            .checkout-container {
-                margin: 30px auto;
-            }
-
-            .page-title {
-                font-size: 27px;
-            }
-
-            .checkout-card {
-                padding: 21px;
-            }
-        }
-
-        @media (max-width: 500px) {
-
-            .delivery-info {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .info-group.full-width {
-                grid-column: auto;
-            }
-
-            .card-heading {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .edit-profile-btn {
-                width: 100%;
-                text-align: center;
-            }
-
-            .summary-total {
-                font-size: 20px;
-            }
-
-            .nav-links a {
-                font-size: 12px;
-            }
-
-            .checkout-container {
-                padding: 0 14px;
-            }
-
-            .checkout-card {
-                padding: 18px;
-            }
-        }
+
+/* =========================================
+   SHOPZONE CHECKOUT - PREMIUM DARK THEME
+========================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #0b0714;
+    color: #f8fafc;
+    min-height: 100vh;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.checkout-container {
+    max-width: 850px;
+    margin: 45px auto;
+    padding: 0 20px;
+}
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.page-subtitle {
+    color: #a99abf;
+    font-size: 14px;
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.checkout-card {
+    background: linear-gradient(145deg, #211631, #151020);
+    padding: 27px;
+    border: 1px solid #38264f;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 22px;
+}
+
+.card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.card-heading h2 {
+    font-size: 20px;
+    color: #e9d5ff;
+}
+
+/* =========================
+   DELIVERY INFORMATION
+========================= */
+
+.delivery-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.info-group {
+    min-width: 0;
+}
+
+.info-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-label {
+    display: block;
+    color: #a99abf;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.info-value {
+    color: #ffffff;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.address-value {
+    background: #100b19;
+    border: 1px solid #49335f;
+    border-radius: 8px;
+    padding: 13px;
+    color: #e9d5ff;
+    line-height: 1.7;
+}
+
+.edit-profile-btn {
+    display: inline-block;
+    padding: 9px 14px;
+    background: rgba(168, 85, 247, 0.12);
+    color: #c084fc;
+    border: 1px solid #6b3c91;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.edit-profile-btn:hover {
+    background: #7e22ce;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.profile-note {
+    margin-top: 20px;
+    padding: 12px 14px;
+    background: rgba(139, 92, 246, 0.10);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 8px;
+    color: #c4b5fd;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* =========================
+   ORDER SUMMARY
+========================= */
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #38264f;
+}
+
+.item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #f8fafc;
+    overflow-wrap: anywhere;
+}
+
+.item-details {
+    color: #b6a9ca;
+    font-size: 13px;
+}
+
+.item-subtotal {
+    font-weight: bold;
+    color: #d8b4fe;
+    white-space: nowrap;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    font-size: 15px;
+    color: #d6c9e5;
+}
+
+.summary-total {
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 2px solid #6b3c91;
+    color: #ffffff;
+}
+
+/* =========================
+   PAYMENT
+========================= */
+
+.payment-section {
+    margin-top: 25px;
+}
+
+.payment-section label {
+    display: block;
+    margin-bottom: 9px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #e9d5ff;
+}
+
+.payment-section select {
+    width: 100%;
+    padding: 13px;
+    background: #100b19;
+    color: white;
+    border: 1px solid #49335f;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+
+.payment-section select:focus {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+
+.payment-section select option {
+    background: #171025;
+    color: white;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.place-order-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 15px;
+    background: linear-gradient(135deg, #a855f7, #7e22ce);
+    color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.place-order-btn:hover {
+    background: linear-gradient(135deg, #c084fc, #9333ea);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.25);
+}
+
+.back-cart {
+    display: inline-block;
+    margin-top: 20px;
+    color: #c084fc;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.back-cart:hover {
+    color: #e9d5ff;
+    text-decoration: underline;
+}
+
+/* =========================
+   ERROR
+========================= */
+
+.error-box {
+    background: #3b1423;
+    color: #fda4af;
+    padding: 13px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #9f3454;
+    font-size: 14px;
+}
+
+/* =========================
+   EMPTY CART
+========================= */
+
+.empty-cart {
+    text-align: center;
+    padding: 40px 20px;
+    color: #b6a9ca;
+}
+
+.empty-cart h2 {
+    color: white;
+    margin-bottom: 12px;
+}
+
+.empty-cart p {
+    line-height: 1.6;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    background: #090610;
+    color: white;
+    text-align: center;
+    padding: 35px 20px;
+    border-top: 1px solid #38264f;
+    margin-top: 55px;
+}
+
+.footer-logo {
+    font-size: 25px;
+    font-weight: bold;
+    color: #c084fc;
+    margin-bottom: 12px;
+}
+
+footer p {
+    color: #a99abf;
+    margin: 8px;
+    font-size: 13px;
+}
+
+.copyright {
+    font-size: 12px;
+    margin-top: 20px !important;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+
+    .checkout-container {
+        margin: 30px auto;
+    }
+
+    .page-title {
+        font-size: 27px;
+    }
+
+    .checkout-card {
+        padding: 21px;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .delivery-info {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .info-group.full-width {
+        grid-column: auto;
+    }
+
+    .card-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .edit-profile-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .summary-total {
+        font-size: 20px;
+    }
+
+    .checkout-container {
+        padding: 0 14px;
+    }
+
+    .checkout-card {
+        padding: 18px;
+    }
+}
+
     </style>
 </head>
 
 <body>
 
     <!-- NAVBAR -->
+    <header class="navbar">
 
-    
-<!-- NAVBAR -->
-<nav class="navbar">
+        <div class="logo">
+            🛒 ShopZone
+        </div>
 
-    <div class="logo">
-        🛒 ShopZone
-    </div>
+        <nav>
 
-    <div class="nav-links">
-
-        <a href="{{ url_for('home') }}"
-           class="{{ 'active' if request.endpoint == 'home' else '' }}">
-            Home
-        </a>
-
-        <a href="{{ url_for('categories_page') }}"
-           class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
-            Categories
-        </a>
-
-        <a href="{{ url_for('products_page') }}"
-           class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}">
-            Products
-        </a>
-
-        <a href="{{ url_for('budget_planner') }}"
-           class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
-            Budget Planner
-        </a>
-
-        <a href="{{ url_for('bundle_builder') }}"
-           class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
-            Bundle Builder
-        </a>
-
-        {% if session.get('user') %}
-            <a href="{{ url_for('trust_profile') }}"
-               class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
-                Trust Profile
+            <a href="{{ url_for('home') }}"
+               class="{{ 'active' if request.endpoint == 'home' else '' }}">
+                Home
             </a>
-        {% endif %}
 
-        <a href="{{ url_for('profile') }}"
-           class="{{ 'active' if request.endpoint == 'profile' else '' }}">
-            My Profile
-        </a>
-
-        <a href="{{ url_for('cart') }}"
-           class="{{ 'active' if request.endpoint == 'cart' else '' }}">
-            Cart 🛒
-        </a>
-
-        <a href="{{ url_for('orders') }}"
-           class="{{ 'active' if request.endpoint == 'orders' else '' }}">
-            Orders
-        </a>
-
-        {% if session.get('user') %}
-            <a href="{{ url_for('logout') }}" class="login-btn">
-                Logout
+            <a href="{{ url_for('categories_page') }}"
+               class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
+                Categories
             </a>
-        {% else %}
-            <a href="{{ url_for('login') }}"
-               class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
-                Login
+
+            <a href="{{ url_for('products_page') }}"
+               class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}">
+                Products
             </a>
-        {% endif %}
 
-    </div>
+            <a href="{{ url_for('budget_planner') }}"
+               class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
+                Budget Planner
+            </a>
 
-</nav>
+            <a href="{{ url_for('bundle_builder') }}"
+               class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
+                Bundle Builder
+            </a>
+
+            {% if session.get('user') %}
+                <a href="{{ url_for('trust_profile') }}"
+                   class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
+                    Trust Profile
+                </a>
+            {% endif %}
+
+            <a href="{{ url_for('profile') }}"
+               class="{{ 'active' if request.endpoint == 'profile' else '' }}">
+                My Profile
+            </a>
+
+            <a href="{{ url_for('cart') }}"
+               class="{{ 'active' if request.endpoint in ['cart', 'checkout'] else '' }}">
+                Cart 🛒
+            </a>
+
+            <a href="{{ url_for('orders') }}"
+               class="{{ 'active' if request.endpoint == 'orders' else '' }}">
+                Orders
+            </a>
+
+            {% if session.get('user') %}
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}"
+                   class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+                    Login
+                </a>
+            {% endif %}
+
+        </nav>
+
+    </header>
 
     <!-- CHECKOUT -->
-
     <main class="checkout-container">
 
         <h1 class="page-title">Checkout</h1>
@@ -515,13 +492,11 @@
             </div>
         {% endif %}
 
-
         {% if cart_items %}
 
             <form action="{{ url_for('checkout') }}" method="POST">
 
                 <!-- DELIVERY INFORMATION -->
-
                 <section class="checkout-card">
 
                     <div class="card-heading">
@@ -549,7 +524,6 @@
 
                         </div>
 
-
                         <div class="info-group">
 
                             <span class="info-label">Email Address</span>
@@ -560,7 +534,6 @@
 
                         </div>
 
-
                         <div class="info-group">
 
                             <span class="info-label">Phone Number</span>
@@ -570,7 +543,6 @@
                             </p>
 
                         </div>
-
 
                         <div class="info-group full-width">
 
@@ -591,9 +563,7 @@
 
                 </section>
 
-
                 <!-- ORDER SUMMARY -->
-
                 <section class="checkout-card">
 
                     <div class="card-heading">
@@ -626,7 +596,6 @@
 
                     {% endfor %}
 
-
                     <div class="summary-row">
 
                         <span>Total Items</span>
@@ -634,7 +603,6 @@
                         <span>{{ cart_count }}</span>
 
                     </div>
-
 
                     <div class="summary-row summary-total">
 
@@ -646,9 +614,7 @@
 
                     </div>
 
-
                     <!-- PAYMENT METHOD -->
-
                     <div class="payment-section">
 
                         <label for="payment_method">
@@ -677,16 +643,13 @@
 
                     </div>
 
-
                     <!-- PLACE ORDER -->
-
                     <button
                         type="submit"
                         class="place-order-btn"
                     >
                         Place Order
                     </button>
-
 
                     <a
                         href="{{ url_for('cart') }}"
@@ -722,9 +685,7 @@
 
     </main>
 
-
     <!-- FOOTER -->
-
     <footer>
 
         <div class="footer-logo">
@@ -741,8 +702,9 @@
 
     </footer>
 
-
+    <!-- JAVASCRIPT -->
     <script src="{{ url_for('static', filename='css/js/script.js') }}"></script>
 
 </body>
+
 </html>

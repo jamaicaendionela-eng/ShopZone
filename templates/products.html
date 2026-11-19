@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,6 +7,11 @@
 
     <title>Products | ShopZone</title>
 
+    <!-- SHARED GLOBAL CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- PRODUCTS PAGE CSS -->
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/products.css') }}">
 
@@ -15,81 +19,75 @@
 
 <body>
 
-   <!-- NAVBAR -->
+    <!-- NAVBAR -->
     <header class="navbar">
 
         <div class="logo">
             🛒 ShopZone
         </div>
 
-       
-<nav>
+        <nav>
 
-    <a href="{{ url_for('home') }}"
-       class="{{ 'active' if request.endpoint == 'home' else '' }}">
-        Home
-    </a>
+            <a href="{{ url_for('home') }}"
+               class="{{ 'active' if request.endpoint == 'home' else '' }}">
+                Home
+            </a>
 
-    <a href="{{ url_for('categories_page') }}"
-       class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
-        Categories
-    </a>
+            <a href="{{ url_for('categories_page') }}"
+               class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
+                Categories
+            </a>
 
-    <a href="{{ url_for('products_page') }}"
-       class="active"
-       aria-current="page">
-        Products
-    </a>
+            <a href="{{ url_for('products_page') }}"
+               class="{{ 'active' if request.endpoint == 'products_page' else '' }}"
+               aria-current="{{ 'page' if request.endpoint == 'products_page' else 'false' }}">
+                Products
+            </a>
 
-    <a href="{{ url_for('budget_planner') }}"
-       class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
-        Budget Planner
-    </a>
+            <a href="{{ url_for('budget_planner') }}"
+               class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
+                Budget Planner
+            </a>
 
-    <a href="{{ url_for('bundle_builder') }}"
-       class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
-        Bundle Builder
-    </a>
+            <a href="{{ url_for('bundle_builder') }}"
+               class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
+                Bundle Builder
+            </a>
 
-    {% if session.get('user') %}
-        <a href="{{ url_for('trust_profile') }}"
-           class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
-            Trust Profile
-        </a>
-    {% endif %}
+            {% if session.get('user') %}
+                <a href="{{ url_for('trust_profile') }}"
+                   class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
+                    Trust Profile
+                </a>
+            {% endif %}
 
-    <a href="{{ url_for('profile') }}"
-       class="{{ 'active' if request.endpoint == 'profile' else '' }}">
-        My Profile
-    </a>
+            <a href="{{ url_for('profile') }}"
+               class="{{ 'active' if request.endpoint == 'profile' else '' }}">
+                My Profile
+            </a>
 
-    <a href="{{ url_for('cart') }}"
-       class="{{ 'active' if request.endpoint == 'cart' else '' }}">
-        Cart 🛒
-    </a>
+            <a href="{{ url_for('cart') }}"
+               class="{{ 'active' if request.endpoint == 'cart' else '' }}">
+                Cart 🛒
+            </a>
 
-    <a href="{{ url_for('orders') }}"
-       class="{{ 'active' if request.endpoint == 'orders' else '' }}">
-        Orders
-    </a>
+            {% if session.get('user') %}
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}"
+                   class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+                    Login
+                </a>
+            {% endif %}
 
-    {% if session.get('user') %}
-        <a href="{{ url_for('logout') }}" class="login-btn">
-            Logout
-        </a>
-    {% else %}
-        <a href="{{ url_for('login') }}"
-           class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
-            Login
-        </a>
-    {% endif %}
-
-</nav>
-
+        </nav>
 
     </header>
-    <!-- PAGE HEADER -->
 
+
+    <!-- PAGE HEADER -->
     <section class="page-header">
 
         <h1>Our Products</h1>
@@ -102,11 +100,9 @@
 
 
     <!-- PRODUCT CATALOG -->
-
     <section class="catalog">
 
         <!-- SEARCH -->
-
         <div class="search-area">
 
             <input
@@ -118,20 +114,23 @@
 
         </div>
 
-<!-- DYNAMIC CATEGORIES -->
 
-<div class="categories" id="categoryContainer">
-    <button
-        type="button"
-        class="category-btn active"
-        data-category="all"
-        onclick="filterProducts('all', this)"
-    >
-        All
-    </button>
-</div>
+        <!-- DYNAMIC CATEGORIES -->
+        <div class="categories" id="categoryContainer">
+
+            <button
+                type="button"
+                class="category-btn active"
+                data-category="all"
+                onclick="filterProducts('all', this)"
+            >
+                All
+            </button>
+
+        </div>
+
+
         <!-- PRODUCTS -->
-
         <div class="products" id="productContainer">
 
             {% for product_id, product in products.items() %}
@@ -149,9 +148,13 @@
 
                     <div class="product-info">
 
-                        <small>{{ product.category }}</small>
+                        <small>
+                            {{ product.category }}
+                        </small>
 
-                        <h3>{{ product.name }}</h3>
+                        <h3>
+                            {{ product.name }}
+                        </h3>
 
                         <div class="rating">
                             ⭐ {{ product.rating }}
@@ -161,6 +164,8 @@
                             ₱{{ "{:,.0f}".format(product.price) }}
                         </p>
 
+
+                        <!-- PRODUCT BUTTONS -->
                         <div class="product-buttons">
 
                             <a
@@ -170,8 +175,8 @@
                                 View Details
                             </a>
 
-                            <!-- ADD TO CART -->
 
+                            <!-- ADD TO CART -->
                             <form
                                 action="{{ url_for('add_to_cart', product_id=product_id) }}"
                                 method="POST"
@@ -189,8 +194,8 @@
 
                         </div>
 
-                        <!-- COMPARE PRODUCT -->
 
+                        <!-- COMPARE PRODUCT -->
                         <button
                             type="button"
                             class="compare-button"
@@ -211,7 +216,6 @@
 
 
         <!-- COMPARE SELECTION BAR -->
-
         <div
             class="compare-bar"
             id="compareBar"
@@ -249,10 +253,7 @@
     </section>
 
 
-    <script src="{{ url_for('static', filename='css/js/products.js') }}"></script>
-
-     <!-- FOOTER -->
-
+    <!-- FOOTER -->
     <footer>
 
         <div class="footer-logo">
@@ -270,10 +271,11 @@
     </footer>
 
 
-    <script
-        src="{{ url_for('static', filename='css/js/script.js') }}">
-    </script>
+    <!-- PRODUCTS JAVASCRIPT -->
+    <script src="{{ url_for('static', filename='css/js/products.js') }}"></script>
 
+    <!-- GLOBAL JAVASCRIPT -->
+    <script src="{{ url_for('static', filename='css/js/script.js') }}"></script>
 
 </body>
 

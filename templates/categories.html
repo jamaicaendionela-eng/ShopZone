@@ -195,7 +195,6 @@
 
 <body>
 
-   
 <!-- NAVBAR -->
 <header class="navbar">
 
@@ -231,10 +230,10 @@
         </a>
 
         {% if session.get('user') %}
-            <a href="{{ url_for('trust_profile') }}"
-               class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
-                Trust Profile
-            </a>
+        <a href="{{ url_for('trust_profile') }}"
+           class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
+            Trust Profile
+        </a>
         {% endif %}
 
         <a href="{{ url_for('profile') }}"
@@ -248,21 +247,17 @@
         </a>
 
         {% if session.get('user') %}
-            <a href="{{ url_for('logout') }}" class="login-btn">
-                Logout
-            </a>
+        <a href="{{ url_for('logout') }}" class="login-btn">
+            Logout
+        </a>
         {% else %}
-            <a href="{{ url_for('login') }}"
-               class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
-                Login
-            </a>
+        <a href="{{ url_for('login') }}"
+           class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+            Login
+        </a>
         {% endif %}
 
     </nav>
-
-</header>
-
-
     </header>
 
 

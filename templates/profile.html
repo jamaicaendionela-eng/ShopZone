@@ -566,86 +566,79 @@ body {
 
 <body>
 
-    <!-- NAVBAR -->
+    
+<!-- NAVBAR -->
+<header class="navbar">
 
-    <header class="navbar">
+    <div class="logo">
+        🛒 ShopZone
+    </div>
 
-        <div class="logo">
-            🛒 ShopZone
-        </div>
+    <nav>
 
-        
-<nav>
-
-    <a href="{{ url_for('home') }}"
-       class="{{ 'active' if request.endpoint == 'home' else '' }}">
-        Home
-    </a>
-
-    <a href="{{ url_for('categories_page') }}"
-       class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
-        Categories
-    </a>
-
-    <a href="{{ url_for('products_page') }}"
-       class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}">
-        Products
-    </a>
-
-    <a href="{{ url_for('budget_planner') }}"
-       class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
-        Budget Planner
-    </a>
-
-    <a href="{{ url_for('bundle_builder') }}"
-       class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
-        Bundle Builder
-    </a>
-
-    {% if session.get('user') %}
-
-        <a href="{{ url_for('profile') }}"
-           class="active"
-           aria-current="page">
-            My Profile
+        <a href="{{ url_for('home') }}"
+           class="{{ 'active' if request.endpoint == 'home' else '' }}">
+            Home
         </a>
 
-        <a href="{{ url_for('trust_profile') }}"
-           class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
-            Trust Profile
+        <a href="{{ url_for('categories_page') }}"
+           class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
+            Categories
         </a>
 
-    {% endif %}
-
-    <a href="{{ url_for('cart') }}"
-       class="{{ 'active' if request.endpoint == 'cart' else '' }}">
-        Cart 🛒
-    </a>
-
-    <a href="{{ url_for('orders') }}"
-       class="{{ 'active' if request.endpoint == 'orders' else '' }}">
-        Orders
-    </a>
-
-    {% if session.get('user') %}
-
-        <a href="{{ url_for('logout') }}" class="login-btn">
-            Logout
+        <a href="{{ url_for('products_page') }}"
+           class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}">
+            Products
         </a>
 
-    {% else %}
-
-        <a href="{{ url_for('login') }}"
-           class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
-            Login
+        <a href="{{ url_for('budget_planner') }}"
+           class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
+            Budget Planner
         </a>
 
-    {% endif %}
+        <a href="{{ url_for('bundle_builder') }}"
+           class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
+            Bundle Builder
+        </a>
 
-</nav>
+        {% if session.get('user') %}
 
+            <a href="{{ url_for('trust_profile') }}"
+               class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
+                Trust Profile
+            </a>
 
-    </header>
+            <a href="{{ url_for('profile') }}"
+               class="{{ 'active' if request.endpoint == 'profile' else '' }}"
+               {% if request.endpoint == 'profile' %}aria-current="page"{% endif %}>
+                My Profile
+            </a>
+
+        {% endif %}
+
+        <a href="{{ url_for('cart') }}"
+           class="{{ 'active' if request.endpoint in ['cart', 'checkout'] else '' }}">
+            Cart 🛒
+        </a>
+
+        {% if session.get('user') %}
+
+            <a href="{{ url_for('logout') }}" class="login-btn">
+                Logout
+            </a>
+
+        {% else %}
+
+            <a href="{{ url_for('login') }}"
+               class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+                Login
+            </a>
+
+        {% endif %}
+
+    </nav>
+
+</header>
 
 
     <main class="profile-page">

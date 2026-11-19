@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +8,11 @@
 
     <title>{{ product.name }} | ShopZone</title>
 
+    <!-- SHARED GLOBAL CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- PRODUCT DETAILS CSS -->
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/product_details.css') }}">
 </head>
@@ -20,88 +26,84 @@
             🛒 ShopZone
         </div>
 
-       
-<nav>
+        <nav>
 
-    <a href="{{ url_for('home') }}"
-       class="{{ 'active' if request.endpoint == 'home' else '' }}">
-        Home
-    </a>
+            <a href="{{ url_for('home') }}"
+               class="{{ 'active' if request.endpoint == 'home' else '' }}">
+                Home
+            </a>
 
-    <a href="{{ url_for('categories_page') }}"
-       class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
-        Categories
-    </a>
+            <a href="{{ url_for('categories_page') }}"
+               class="{{ 'active' if request.endpoint == 'categories_page' else '' }}">
+                Categories
+            </a>
 
-    <a href="{{ url_for('products_page') }}"
-       class="active"
-       aria-current="page">
-        Products
-    </a>
+            <a href="{{ url_for('products_page') }}"
+               class="{{ 'active' if request.endpoint in ['products_page', 'product_details'] else '' }}">
+                Products
+            </a>
 
-    <a href="{{ url_for('budget_planner') }}"
-       class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
-        Budget Planner
-    </a>
+            <a href="{{ url_for('budget_planner') }}"
+               class="{{ 'active' if request.endpoint == 'budget_planner' else '' }}">
+                Budget Planner
+            </a>
 
-    <a href="{{ url_for('bundle_builder') }}"
-       class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
-        Bundle Builder
-    </a>
+            <a href="{{ url_for('bundle_builder') }}"
+               class="{{ 'active' if request.endpoint == 'bundle_builder' else '' }}">
+                Bundle Builder
+            </a>
 
-    {% if session.get('user') %}
-        <a href="{{ url_for('trust_profile') }}"
-           class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
-            Trust Profile
-        </a>
-    {% endif %}
+            {% if session.get('user') %}
+                <a href="{{ url_for('trust_profile') }}"
+                   class="{{ 'active' if request.endpoint == 'trust_profile' else '' }}">
+                    Trust Profile
+                </a>
+            {% endif %}
 
-    <a href="{{ url_for('profile') }}"
-       class="{{ 'active' if request.endpoint == 'profile' else '' }}">
-        My Profile
-    </a>
+            <a href="{{ url_for('profile') }}"
+               class="{{ 'active' if request.endpoint == 'profile' else '' }}">
+                My Profile
+            </a>
 
-    <a href="{{ url_for('cart') }}"
-       class="{{ 'active' if request.endpoint == 'cart' else '' }}">
-        Cart 🛒
-    </a>
+            <a href="{{ url_for('cart') }}"
+               class="{{ 'active' if request.endpoint == 'cart' else '' }}">
+                Cart 🛒
+            </a>
 
-    <a href="{{ url_for('orders') }}"
-       class="{{ 'active' if request.endpoint == 'orders' else '' }}">
-        Orders
-    </a>
+            <a href="{{ url_for('orders') }}"
+               class="{{ 'active' if request.endpoint == 'orders' else '' }}">
+                Orders
+            </a>
 
-    {% if session.get('user') %}
-        <a href="{{ url_for('logout') }}" class="login-btn">
-            Logout
-        </a>
-    {% else %}
-        <a href="{{ url_for('login') }}"
-           class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
-            Login
-        </a>
-    {% endif %}
+            {% if session.get('user') %}
+                <a href="{{ url_for('logout') }}" class="login-btn">
+                    Logout
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}"
+                   class="login-btn {{ 'active' if request.endpoint == 'login' else '' }}">
+                    Login
+                </a>
+            {% endif %}
 
-</nav>
+        </nav>
 
     </header>
 
-    <!-- MAIN -->
 
+    <!-- MAIN -->
     <main class="container">
 
-        <a
-            href="{{ url_for('products_page') }}"
-            class="back-button"
-        >
+        <a href="{{ url_for('products_page') }}"
+           class="back-button">
             ← Back to Products
         </a>
 
 
+        <!-- PRODUCT DETAILS -->
         <section class="product-details">
 
             <!-- PRODUCT IMAGE -->
-
             <div class="product-image">
 
                 <span>
@@ -112,28 +114,23 @@
 
 
             <!-- PRODUCT INFORMATION -->
-
             <div class="product-info">
 
                 <span class="category">
                     {{ product.category }}
                 </span>
 
-
                 <h1>
                     {{ product.name }}
                 </h1>
-
 
                 <div class="rating">
                     ⭐ {{ product.rating }}
                 </div>
 
-
                 <h2 class="price">
                     ₱{{ "{:,.0f}".format(product.price) }}
                 </h2>
-
 
                 <p class="description">
                     {{ product.description }}
@@ -141,25 +138,21 @@
 
 
                 <!-- SPECIFICATIONS -->
-
                 <div class="specifications">
 
                     <h3>
                         Specifications
                     </h3>
 
-
                     <div class="spec">
                         <span>RAM</span>
                         <strong>{{ product.ram }}</strong>
                     </div>
 
-
                     <div class="spec">
                         <span>Storage</span>
                         <strong>{{ product.storage }}</strong>
                     </div>
-
 
                     <div class="spec">
                         <span>Processor</span>
@@ -170,33 +163,25 @@
 
 
                 <!-- QUANTITY -->
-
                 <div class="quantity">
 
                     <span>
                         Quantity
                     </span>
 
-
                     <div class="quantity-controls">
 
-                        <button
-                            type="button"
-                            onclick="decreaseQuantity()"
-                        >
+                        <button type="button"
+                                onclick="decreaseQuantity()">
                             −
                         </button>
-
 
                         <span id="quantity">
                             1
                         </span>
 
-
-                        <button
-                            type="button"
-                            onclick="increaseQuantity()"
-                        >
+                        <button type="button"
+                                onclick="increaseQuantity()">
                             +
                         </button>
 
@@ -206,26 +191,18 @@
 
 
                 <!-- ADD TO CART -->
+                <form action="{{ url_for('add_to_cart', product_id=product_id) }}"
+                      method="POST"
+                      id="addToCartForm">
 
-                <form
-                    action="{{ url_for('add_to_cart', product_id=product_id) }}"
-                    method="POST"
-                    id="addToCartForm"
-                >
+                    <input type="hidden"
+                           id="quantityInput"
+                           name="quantity"
+                           value="1">
 
-                    <input
-                        type="hidden"
-                        id="quantityInput"
-                        name="quantity"
-                        value="1"
-                    >
-
-
-                    <button
-                        type="submit"
-                        class="cart-button"
-                        id="addCartButton"
-                    >
+                    <button type="submit"
+                            class="cart-button"
+                            id="addCartButton">
                         🛒 Add to Cart
                     </button>
 
@@ -237,7 +214,6 @@
 
 
         <!-- SIMILAR PRODUCTS -->
-
         <section class="similar-products-section">
 
             <div class="similar-products-heading">
@@ -301,14 +277,10 @@
 
         </section>
 
-
     </main>
 
 
-    <script src="{{ url_for('static', filename='css/js/product_details.js') }}"></script>
-
-     <!-- FOOTER -->
-
+    <!-- FOOTER -->
     <footer>
 
         <div class="footer-logo">
@@ -326,10 +298,11 @@
     </footer>
 
 
-    <script
-        src="{{ url_for('static', filename='css/js/script.js') }}">
-    </script>
+    <!-- PRODUCT DETAILS JAVASCRIPT -->
+    <script src="{{ url_for('static', filename='css/js/product_details.js') }}"></script>
 
+    <!-- GLOBAL JAVASCRIPT -->
+    <script src="{{ url_for('static', filename='css/js/script.js') }}"></script>
 
 </body>
 
