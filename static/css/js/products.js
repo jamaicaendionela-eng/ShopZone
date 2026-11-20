@@ -1,3 +1,4 @@
+
 /* =====================================
    SHOPZONE PRODUCT COMPARISON
 ===================================== */
@@ -15,14 +16,11 @@ let currentCategory = "all";
 function generateCategoryButtons() {
     const categoryContainer = document.getElementById("categoryContainer");
 
-    if (!categoryContainer) {
-        return;
-    }
+    if (!categoryContainer) return;
 
     const productCards = document.querySelectorAll(".product-card");
     const categories = new Set();
 
-    // Collect categories from the products currently rendered by Flask.
     productCards.forEach((card) => {
         const category = (card.dataset.category || "").trim();
 
@@ -31,20 +29,19 @@ function generateCategoryButtons() {
         }
     });
 
-    // Sort categories alphabetically.
     const sortedCategories = Array.from(categories).sort((a, b) =>
         a.localeCompare(b)
     );
 
-    // Rebuild the category buttons.
     categoryContainer.innerHTML = "";
 
     const allButton = document.createElement("button");
 
     allButton.type = "button";
-    allButton.className = "category-btn active";
+    allButton.className = "category-btn";
     allButton.dataset.category = "all";
     allButton.textContent = "All";
+
     allButton.addEventListener("click", () => {
         filterProducts("all", allButton);
     });
@@ -125,6 +122,29 @@ function filterProducts(category, button) {
 
 
 /* =====================================
+   CATEGORY FROM URL
+===================================== */
+
+function applyCategoryFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const requestedCategory = params.get("category");
+
+    if (!requestedCategory) return;
+
+    const categoryButton = Array.from(
+        document.querySelectorAll(".category-btn")
+    ).find((button) =>
+        button.dataset.category.toLowerCase() ===
+        requestedCategory.trim().toLowerCase()
+    );
+
+    if (categoryButton) {
+        filterProducts(requestedCategory, categoryButton);
+    }
+}
+
+
+/* =====================================
    SELECT / DESELECT PRODUCTS
 ===================================== */
 
@@ -133,14 +153,12 @@ function toggleCompareProduct(button) {
 
     const selectedIndex = selectedCompareProducts.indexOf(productId);
 
-    // Remove product if already selected.
     if (selectedIndex !== -1) {
         selectedCompareProducts.splice(selectedIndex, 1);
         updateCompareInterface();
         return;
     }
 
-    // Maximum of four products.
     if (selectedCompareProducts.length >= MAX_COMPARE_PRODUCTS) {
         alert("You can compare a maximum of 4 products.");
         return;
@@ -164,10 +182,7 @@ function updateCompareInterface() {
     const selectedCount = selectedCompareProducts.length;
 
     if (compareBar) {
-        compareBar.classList.toggle(
-            "visible",
-            selectedCount > 0
-        );
+        compareBar.classList.toggle("visible", selectedCount > 0);
     }
 
     if (compareStatus) {
@@ -187,10 +202,7 @@ function updateCompareInterface() {
 
         button.classList.toggle("selected", isSelected);
 
-        button.setAttribute(
-            "aria-pressed",
-            String(isSelected)
-        );
+        button.setAttribute("aria-pressed", String(isSelected));
 
         button.textContent = isSelected
             ? "✓ Selected — Remove"
@@ -242,9 +254,7 @@ function openProductComparison() {
 function showCartNotification() {
     const cartLink = document.querySelector(".cart-link");
 
-    if (!cartLink) {
-        return;
-    }
+    if (!cartLink) return;
 
     let notification = cartLink.querySelector(".cart-notification");
 
@@ -262,25 +272,23 @@ function showCartNotification() {
 ===================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Generate category buttons from existing product cards.
+
     generateCategoryButtons();
 
-    // Initialize product filtering.
     updateProducts();
 
-    // Initialize comparison interface.
+    applyCategoryFromURL();
+
     updateCompareInterface();
 
-    // Preserve AJAX Add to Cart behavior.
     document.querySelectorAll(".add-to-cart-form").forEach((form) => {
+
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
 
             const button = form.querySelector(".add-cart-button");
 
-            if (!button || button.disabled) {
-                return;
-            }
+            if (!button || button.disabled) return;
 
             const originalText = button.textContent;
 
@@ -321,5 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 button.disabled = false;
             }
         });
+
     });
+
 });

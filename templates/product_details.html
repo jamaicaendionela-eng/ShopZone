@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,11 +8,9 @@
 
     <title>{{ product.name }} | ShopZone</title>
 
-    <!-- SHARED GLOBAL CSS -->
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
 
-    <!-- PRODUCT DETAILS CSS -->
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/product_details.css') }}">
 </head>
@@ -70,11 +68,6 @@
                 Cart 🛒
             </a>
 
-            <a href="{{ url_for('orders') }}"
-               class="{{ 'active' if request.endpoint == 'orders' else '' }}">
-                Orders
-            </a>
-
             {% if session.get('user') %}
                 <a href="{{ url_for('logout') }}" class="login-btn">
                     Logout
@@ -106,9 +99,21 @@
             <!-- PRODUCT IMAGE -->
             <div class="product-image">
 
-                <span>
-                    {{ product.icon }}
-                </span>
+                {% if product.image_url %}
+
+                    <img
+                        src="{{ product.image_url }}"
+                        alt="{{ product.name }}"
+                        loading="lazy"
+                    >
+
+                {% else %}
+
+                    <div class="no-product-image">
+                        Image Not Available
+                    </div>
+
+                {% endif %}
 
             </div>
 
@@ -125,7 +130,10 @@
                 </h1>
 
                 <div class="rating">
-                    ⭐ {{ product.rating }}
+                    ⭐ {{ average_product_rating|default(product.rating) }}
+                    {% if product_review_count|default(0) > 0 %}
+                        ({{ product_review_count }} reviews)
+                    {% endif %}
                 </div>
 
                 <h2 class="price">
@@ -213,6 +221,245 @@
         </section>
 
 
+        <!-- PRODUCT REVIEWS -->
+        <section class="product-reviews-section" id="product-reviews">
+
+            <div class="product-reviews-heading">
+
+                <span>CUSTOMER FEEDBACK</span>
+
+                <h2>Product Reviews</h2>
+
+                <p>
+                    See what customers say about this product.
+                </p>
+
+                <div class="product-review-summary">
+                    ⭐
+                    <strong>
+                        {{ average_product_rating|default(product.rating) }}
+                    </strong>
+
+                    <span>
+                        Based on {{ product_review_count|default(0) }} reviews
+                    </span>
+                </div>
+
+            </div>
+
+
+            <!-- REVIEW SUCCESS MESSAGE -->
+            {% if review_submitted %}
+
+                <div class="review-success">
+                    Your product review has been submitted successfully!
+                </div>
+
+            {% endif %}
+
+
+            <!-- REVIEW ERROR MESSAGE -->
+            {% if review_error %}
+
+                <div class="review-error">
+                    {{ review_error }}
+                </div>
+
+            {% endif %}
+
+
+            <!-- REVIEW FORM -->
+            {% if session.get('user') and eligible_orders %}
+
+                <div class="write-review-card">
+
+                    <h3>
+                        Write a Product Review
+                    </h3>
+
+                    <p>
+                        Your order must be delivered before you can review this product.
+                    </p>
+
+                    <form method="POST"
+                          action="{{ url_for('product_details', product_id=product_id) }}#product-reviews"
+                          class="product-review-form">
+
+                        <div class="review-form-group">
+
+                            <label for="order_id">
+                                Select Delivered Order
+                            </label>
+
+                            <select name="order_id"
+                                    id="order_id"
+                                    required>
+
+                                <option value="">
+                                    Choose an order
+                                </option>
+
+                                {% for order in eligible_orders %}
+
+                                    <option value="{{ order.id }}">
+                                        Order #{{ order.id }}
+                                        {% if order.created_at %}
+                                            - {{ order.created_at }}
+                                        {% endif %}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="review-form-group">
+
+                            <label for="rating">
+                                Your Rating
+                            </label>
+
+                            <select name="rating"
+                                    id="rating"
+                                    required>
+
+                                <option value="">
+                                    Select your rating
+                                </option>
+
+                                <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                                <option value="4">⭐⭐⭐⭐ - Very Good</option>
+                                <option value="3">⭐⭐⭐ - Good</option>
+                                <option value="2">⭐⭐ - Fair</option>
+                                <option value="1">⭐ - Poor</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="review-form-group">
+
+                            <label for="review">
+                                Your Review
+                            </label>
+
+                            <textarea
+                                name="review"
+                                id="review"
+                                rows="5"
+                                maxlength="1000"
+                                placeholder="Share your experience with this product..."
+                                required></textarea>
+
+                        </div>
+
+
+                        <button type="submit"
+                                class="submit-review-button">
+                            Submit Review
+                        </button>
+
+                    </form>
+
+                </div>
+
+            {% elif session.get('user') %}
+
+                <div class="review-notice">
+                    You can write a review after purchasing this product
+                    and receiving your order.
+                </div>
+
+            {% else %}
+
+                <div class="review-notice">
+
+                    <p>
+                        Please log in and purchase this product to write a review.
+                    </p>
+
+                    <a href="{{ url_for('login') }}">
+                        Login to Your Account
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- CUSTOMER REVIEW LIST -->
+            <div class="product-review-list">
+
+                <h3>
+                    Customer Reviews
+                </h3>
+
+                {% if product_reviews %}
+
+                    {% for review in product_reviews %}
+
+                        <div class="product-review-card">
+
+                            <div class="product-review-top">
+
+                                <div class="reviewer-info">
+
+                                    <strong>
+                                        {{ review.reviewer_name|default('ShopZone Customer') }}
+                                    </strong>
+
+                                    <small>
+                                        Verified Purchase
+                                    </small>
+
+                                </div>
+
+                                <div class="review-stars">
+                                    {% for star in range(review.rating|int) %}
+                                        ⭐
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+
+
+                            <p class="customer-review-text">
+                                {{ review.review }}
+                            </p>
+
+
+                            <small class="review-date">
+                                {{ review.created_at }}
+                            </small>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="no-product-reviews">
+
+                        <p>
+                            No reviews yet for this product.
+                        </p>
+
+                        <span>
+                            Be the first customer to share your experience!
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
         <!-- SIMILAR PRODUCTS -->
         <section class="similar-products-section">
 
@@ -237,7 +484,23 @@
                         <div class="similar-product-card">
 
                             <div class="similar-product-image">
-                                {{ item.icon }}
+
+                                {% if item.image_url %}
+
+                                    <img
+                                        src="{{ item.image_url }}"
+                                        alt="{{ item.name }}"
+                                        loading="lazy"
+                                    >
+
+                                {% else %}
+
+                                    <div class="no-product-image">
+                                        Image Not Available
+                                    </div>
+
+                                {% endif %}
+
                             </div>
 
                             <div class="similar-product-info">

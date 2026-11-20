@@ -63,9 +63,7 @@ app.secret_key = os.getenv(
 
 def get_products():
     """
-    Get all products from Supabase and convert them
-    into the same dictionary structure used by the
-    existing ShopZone templates.
+    Get all products from Supabase, including product images.
     """
 
     try:
@@ -89,9 +87,9 @@ def get_products():
             products[product_id] = {
                 "name": product.get("name", ""),
                 "category": product.get("category", ""),
-                "price": float(product.get("price", 0)),
-                "icon": product.get("icon", "🛍️"),
-                "rating": float(product.get("rating", 0)),
+                "price": float(product.get("price") or 0),
+                "image_url": product.get("image_url") or "",
+                "rating": float(product.get("rating") or 0),
                 "description": product.get("description", ""),
                 "ram": product.get("ram", "N/A"),
                 "storage": product.get("storage", "N/A"),
@@ -107,7 +105,7 @@ def get_products():
 
 def get_product(product_id):
     """
-    Get one product from Supabase.
+    Get one product from Supabase, including its image.
     """
 
     try:
@@ -128,9 +126,9 @@ def get_product(product_id):
         return {
             "name": product.get("name", ""),
             "category": product.get("category", ""),
-            "price": float(product.get("price", 0)),
-            "icon": product.get("icon", "🛍️"),
-            "rating": float(product.get("rating", 0)),
+            "price": float(product.get("price") or 0),
+            "image_url": product.get("image_url") or "",
+            "rating": float(product.get("rating") or 0),
             "description": product.get("description", ""),
             "ram": product.get("ram", "N/A"),
             "storage": product.get("storage", "N/A"),
@@ -140,55 +138,6 @@ def get_product(product_id):
     except Exception as e:
         print("Product database error:", e)
         return None
-
-
-def record_product_view(product_id):
-    """
-    Record a product view in Supabase.
-
-    Logged-in users are linked through their session user ID.
-    Guest views are stored with user_id left as NULL.
-    The product page still loads if recording a view fails.
-    """
-
-    user = session.get("user")
-    user_id = user.get("id") if user else None
-
-    view_data = {
-        "product_id": product_id
-    }
-
-    if user_id is not None:
-        view_data["user_id"] = user_id
-
-    try:
-        (
-            supabase
-            .table("product_views")
-            .insert(view_data)
-            .execute()
-        )
-
-        print(
-            f"Product view recorded: product_id={product_id}, "
-            f"user_id={user_id}"
-        )
-
-    except Exception as e:
-        # Do not prevent customers from viewing products
-        # if the view-history insert is unavailable.
-        print("Product view tracking error:", e)
-
-
-
-# =========================================================
-# HOME
-# =========================================================
-
-# =========================================================
-# HOME
-# =========================================================
-
 
 # =========================================================
 # HOME
@@ -889,26 +838,389 @@ def compare_products():
 
 
 
-# =========================================================
-# PRODUCT DETAILS
-# =========================================================
 
 # =========================================================
-# PRODUCT DETAILS
+# PRODUCT VIEW TRACKING
 # =========================================================
 
-@app.route("/product/<int:product_id>")
+def record_product_view(product_id):
+    """
+    Record product views in Supabase.
+    """
+
+    try:
+        user = session.get("user")
+
+        view_data = {
+            "product_id": product_id,
+            "user_id": user.get("id") if isinstance(user, dict) else None
+        }
+
+        supabase.table("product_views").insert(
+            view_data
+        ).execute()
+
+        print("PRODUCT VIEW RECORDED:", product_id)
+
+    except Exception as e:
+        print("Product view tracking error:", e)
+
+
+# =========================================================
+# PRODUCT DETAILS AND PRODUCT REVIEWS
+# =========================================================
+
+@app.route(
+    "/product/<int:product_id>",
+    methods=["GET", "POST"]
+)
 def product_details(product_id):
+
+    user = session.get("user")
 
     product = get_product(product_id)
 
     if product is None:
         return "Product not found", 404
 
-    # Record this product view.
+    # =============================================
+    # SUBMIT PRODUCT REVIEW
+    # =============================================
+
+    if request.method == "POST":
+
+        if not user:
+            return redirect(url_for("login"))
+
+        order_id = request.form.get("order_id", "").strip()
+        rating = request.form.get("rating", "").strip()
+        review = request.form.get("review", "").strip()
+
+        if not order_id or not rating or not review:
+            return redirect(
+                url_for(
+                    "product_details",
+                    product_id=product_id,
+                    error="required"
+                ) + "#product-reviews"
+            )
+
+        try:
+            order_id = int(order_id)
+            rating = int(rating)
+
+        except (TypeError, ValueError):
+            return redirect(
+                url_for(
+                    "product_details",
+                    product_id=product_id,
+                    error="invalid"
+                ) + "#product-reviews"
+            )
+
+        if rating < 1 or rating > 5:
+            return redirect(
+                url_for(
+                    "product_details",
+                    product_id=product_id,
+                    error="invalid"
+                ) + "#product-reviews"
+            )
+
+        if len(review) > 1000:
+            return redirect(
+                url_for(
+                    "product_details",
+                    product_id=product_id,
+                    error="too_long"
+                ) + "#product-reviews"
+            )
+
+        try:
+
+            # -----------------------------------------
+            # VERIFY ORDER OWNERSHIP AND DELIVERY
+            # -----------------------------------------
+
+            order_response = (
+                supabase
+                .table("orders")
+                .select("id, user_id, status")
+                .eq("id", order_id)
+                .eq("user_id", user["id"])
+                .eq("status", "Delivered")
+                .limit(1)
+                .execute()
+            )
+
+            if not order_response.data:
+
+                return redirect(
+                    url_for(
+                        "product_details",
+                        product_id=product_id,
+                        error="not_eligible"
+                    ) + "#product-reviews"
+                )
+
+            # -----------------------------------------
+            # VERIFY PRODUCT EXISTS IN THAT ORDER
+            # -----------------------------------------
+
+            order_item_response = (
+                supabase
+                .table("order_items")
+                .select("id, product_id")
+                .eq("order_id", order_id)
+                .eq("product_id", product_id)
+                .limit(1)
+                .execute()
+            )
+
+            if not order_item_response.data:
+
+                return redirect(
+                    url_for(
+                        "product_details",
+                        product_id=product_id,
+                        error="product_not_purchased"
+                    ) + "#product-reviews"
+                )
+
+            # -----------------------------------------
+            # PREVENT DUPLICATE PRODUCT REVIEWS
+            # -----------------------------------------
+
+            existing_review = (
+                supabase
+                .table("product_reviews")
+                .select("id")
+                .eq("order_id", order_id)
+                .eq("product_id", product_id)
+                .limit(1)
+                .execute()
+            )
+
+            if existing_review.data:
+
+                return redirect(
+                    url_for(
+                        "product_details",
+                        product_id=product_id,
+                        error="duplicate"
+                    ) + "#product-reviews"
+                )
+
+            # -----------------------------------------
+            # SAVE PRODUCT REVIEW
+            # -----------------------------------------
+
+            supabase.table("product_reviews").insert({
+                "user_id": user["id"],
+                "product_id": product_id,
+                "order_id": order_id,
+                "rating": rating,
+                "review": review
+            }).execute()
+
+            print(
+                "PRODUCT REVIEW SUBMITTED:",
+                product_id,
+                "BY USER:",
+                user["id"]
+            )
+
+            return redirect(
+                url_for(
+                    "product_details",
+                    product_id=product_id,
+                    submitted="1"
+                ) + "#product-reviews"
+            )
+
+        except Exception as e:
+
+            print("Product review submission error:", e)
+
+            return redirect(
+                url_for(
+                    "product_details",
+                    product_id=product_id,
+                    error="submit_failed"
+                ) + "#product-reviews"
+            )
+
+    # =============================================
+    # RECORD PRODUCT VIEW
+    # =============================================
+
     record_product_view(product_id)
 
-    # Get all products for Similar Products.
+    # =============================================
+    # LOAD PRODUCT REVIEWS
+    # =============================================
+
+    product_reviews = []
+    product_review_count = 0
+    average_product_rating = product.get("rating", 0)
+
+    try:
+
+        reviews_response = (
+            supabase
+            .table("product_reviews")
+            .select("*")
+            .eq("product_id", product_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        product_reviews = reviews_response.data or []
+
+        product_review_count = len(product_reviews)
+
+        # Calculate average rating from actual reviews.
+        if product_reviews:
+
+            total_rating = sum(
+                int(item.get("rating") or 0)
+                for item in product_reviews
+            )
+
+            average_product_rating = round(
+                total_rating / product_review_count,
+                1
+            )
+
+        # -----------------------------------------
+        # GET REVIEWER NAMES
+        # -----------------------------------------
+
+        reviewer_ids = list({
+            item["user_id"]
+            for item in product_reviews
+            if item.get("user_id") is not None
+        })
+
+        reviewer_names = {}
+
+        if reviewer_ids:
+
+            users_response = (
+                supabase
+                .table("users")
+                .select("id, name")
+                .in_("id", reviewer_ids)
+                .execute()
+            )
+
+            reviewer_names = {
+                item["id"]: item.get("name", "Customer")
+                for item in (users_response.data or [])
+            }
+
+        # Attach customer names to product reviews.
+        for item in product_reviews:
+
+            item["reviewer_name"] = reviewer_names.get(
+                item.get("user_id"),
+                "ShopZone Customer"
+            )
+
+    except Exception as e:
+
+        print("Product reviews loading error:", e)
+
+        product_reviews = []
+        product_review_count = 0
+
+    # =============================================
+    # FIND ELIGIBLE ORDERS FOR PRODUCT REVIEW
+    # =============================================
+
+    eligible_orders = []
+
+    if user:
+
+        try:
+
+            # Get only delivered orders belonging to this user.
+            delivered_orders_response = (
+                supabase
+                .table("orders")
+                .select("id, created_at")
+                .eq("user_id", user["id"])
+                .eq("status", "Delivered")
+                .order("created_at", desc=True)
+                .execute()
+            )
+
+            delivered_orders = (
+                delivered_orders_response.data or []
+            )
+
+            delivered_order_ids = [
+                order["id"]
+                for order in delivered_orders
+            ]
+
+            if delivered_order_ids:
+
+                # Find orders containing this exact product.
+                order_items_response = (
+                    supabase
+                    .table("order_items")
+                    .select("order_id, product_id")
+                    .in_("order_id", delivered_order_ids)
+                    .eq("product_id", product_id)
+                    .execute()
+                )
+
+                purchased_order_ids = {
+                    item["order_id"]
+                    for item in (order_items_response.data or [])
+                }
+
+                # Get existing reviews for this product.
+                reviewed_response = (
+                    supabase
+                    .table("product_reviews")
+                    .select("order_id")
+                    .eq("product_id", product_id)
+                    .in_("order_id", delivered_order_ids)
+                    .execute()
+                )
+
+                reviewed_order_ids = {
+                    item["order_id"]
+                    for item in (reviewed_response.data or [])
+                }
+
+                # Only orders that:
+                # 1. Belong to the logged-in user.
+                # 2. Are Delivered.
+                # 3. Contain this product.
+                # 4. Have not reviewed this product yet.
+
+                for order in delivered_orders:
+
+                    order_id = order["id"]
+
+                    if (
+                        order_id in purchased_order_ids
+                        and order_id not in reviewed_order_ids
+                    ):
+
+                        eligible_orders.append(order)
+
+        except Exception as e:
+
+            print("Eligible product orders error:", e)
+
+    # =============================================
+    # GET SIMILAR PRODUCTS
+    # =============================================
+
     all_products = get_products()
     similar_products = []
 
@@ -918,7 +1230,6 @@ def product_details(product_id):
 
     for similar_id, similar_product in all_products.items():
 
-        # Do not recommend the product currently being viewed.
         if int(similar_id) == product_id:
             continue
 
@@ -926,7 +1237,6 @@ def product_details(product_id):
             similar_product.get("category", "")
         ).strip().lower()
 
-        # Recommend products from the same category.
         if similar_category == current_category:
 
             item = similar_product.copy()
@@ -940,16 +1250,46 @@ def product_details(product_id):
         reverse=True
     )
 
-    # Limit recommendations to four products.
     similar_products = similar_products[:4]
+
+    # =============================================
+    # REVIEW MESSAGES
+    # =============================================
+
+    review_error_messages = {
+        "required": "Please complete all review fields.",
+        "invalid": "Invalid rating or review information.",
+        "too_long": "Your review must not exceed 1,000 characters.",
+        "not_eligible": "Only customers with a delivered order can review.",
+        "product_not_purchased": "This product was not found in your selected order.",
+        "duplicate": "You have already reviewed this product for that order.",
+        "submit_failed": "Unable to submit your review. Please try again."
+    }
+
+    review_error = review_error_messages.get(
+        request.args.get("error"),
+        ""
+    )
+
+    # =============================================
+    # DISPLAY PRODUCT DETAILS
+    # =============================================
 
     return render_template(
         "product_details.html",
         product=product,
         product_id=product_id,
-        similar_products=similar_products
-    )
+        similar_products=similar_products,
 
+        product_reviews=product_reviews,
+        product_review_count=product_review_count,
+        average_product_rating=average_product_rating,
+
+        eligible_orders=eligible_orders,
+
+        review_error=review_error,
+        review_submitted=request.args.get("submitted") == "1"
+    )
 
 # =========================================================
 # LOGIN
@@ -2218,35 +2558,17 @@ def admin_products():
 # ADD ADMIN PRODUCT
 # =========================================================
 
-@app.route(
-    "/admin/products/add",
-    methods=["POST"]
-)
+@app.route("/admin/products/add", methods=["POST"])
 def admin_add_product():
 
-    name = request.form.get(
-        "name",
+    name = request.form.get("name", "").strip()
+    category = request.form.get("category", "").strip()
+    price = request.form.get("price", "").strip()
+    rating = request.form.get("rating", "0").strip()
+
+    image_url = request.form.get(
+        "image_url",
         ""
-    ).strip()
-
-    category = request.form.get(
-        "category",
-        ""
-    ).strip()
-
-    price = request.form.get(
-        "price",
-        ""
-    ).strip()
-
-    rating = request.form.get(
-        "rating",
-        "0"
-    ).strip()
-
-    icon = request.form.get(
-        "icon",
-        "🛍️"
     ).strip()
 
     description = request.form.get(
@@ -2254,48 +2576,29 @@ def admin_add_product():
         ""
     ).strip()
 
-    ram = request.form.get(
-        "ram",
-        "N/A"
-    ).strip()
-
-    storage = request.form.get(
-        "storage",
-        "N/A"
-    ).strip()
-
-    processor = request.form.get(
-        "processor",
-        "N/A"
-    ).strip()
+    ram = request.form.get("ram", "N/A").strip()
+    storage = request.form.get("storage", "N/A").strip()
+    processor = request.form.get("processor", "N/A").strip()
 
     if not name or not category or not price:
-
-        return redirect(
-            url_for("admin_products")
-        )
+        return redirect(url_for("admin_products"))
 
     try:
 
         price = float(price)
-
         rating = float(rating or 0)
 
         if price < 0:
             price = 0
 
-        if rating < 0:
-            rating = 0
-
-        if rating > 5:
-            rating = 5
+        rating = max(0, min(rating, 5))
 
         product_data = {
             "name": name,
             "category": category,
             "price": price,
+            "image_url": image_url,
             "rating": rating,
-            "icon": icon or "🛍️",
             "description": description,
             "ram": ram or "N/A",
             "storage": storage or "N/A",
@@ -2309,17 +2612,13 @@ def admin_add_product():
             .execute()
         )
 
+        print("PRODUCT ADDED SUCCESSFULLY:", name)
+
     except Exception as e:
 
-        print(
-            "Admin add product error:",
-            e
-        )
+        print("Admin add product error:", e)
 
-    return redirect(
-        url_for("admin_products")
-    )
-
+    return redirect(url_for("admin_products"))
 
 # =========================================================
 # EDIT ADMIN PRODUCT
@@ -2331,78 +2630,40 @@ def admin_add_product():
 )
 def admin_edit_product(product_id):
 
-    name = request.form.get(
-        "name",
+    name = request.form.get("name", "").strip()
+    category = request.form.get("category", "").strip()
+    price = request.form.get("price", "").strip()
+    rating = request.form.get("rating", "0").strip()
+
+    image_url = request.form.get(
+        "image_url",
         ""
     ).strip()
 
-    category = request.form.get(
-        "category",
-        ""
-    ).strip()
-
-    price = request.form.get(
-        "price",
-        ""
-    ).strip()
-
-    rating = request.form.get(
-        "rating",
-        "0"
-    ).strip()
-
-    icon = request.form.get(
-        "icon",
-        "🛍️"
-    ).strip()
-
-    description = request.form.get(
-        "description",
-        ""
-    ).strip()
-
-    ram = request.form.get(
-        "ram",
-        "N/A"
-    ).strip()
-
-    storage = request.form.get(
-        "storage",
-        "N/A"
-    ).strip()
-
-    processor = request.form.get(
-        "processor",
-        "N/A"
-    ).strip()
+    description = request.form.get("description", "").strip()
+    ram = request.form.get("ram", "N/A").strip()
+    storage = request.form.get("storage", "N/A").strip()
+    processor = request.form.get("processor", "N/A").strip()
 
     if not name or not category or not price:
-
-        return redirect(
-            url_for("admin_products")
-        )
+        return redirect(url_for("admin_products"))
 
     try:
 
         price = float(price)
-
         rating = float(rating or 0)
 
         if price < 0:
             price = 0
 
-        if rating < 0:
-            rating = 0
-
-        if rating > 5:
-            rating = 5
+        rating = max(0, min(rating, 5))
 
         product_data = {
             "name": name,
             "category": category,
             "price": price,
+            "image_url": image_url,
             "rating": rating,
-            "icon": icon or "🛍️",
             "description": description,
             "ram": ram or "N/A",
             "storage": storage or "N/A",
@@ -2413,24 +2674,17 @@ def admin_edit_product(product_id):
             supabase
             .table("products")
             .update(product_data)
-            .eq(
-                "id",
-                product_id
-            )
+            .eq("id", product_id)
             .execute()
         )
 
+        print("PRODUCT UPDATED SUCCESSFULLY:", product_id)
+
     except Exception as e:
 
-        print(
-            "Admin edit product error:",
-            e
-        )
+        print("Admin edit product error:", e)
 
-    return redirect(
-        url_for("admin_products")
-    )
-
+    return redirect(url_for("admin_products"))
 
 # =========================================================
 # DELETE ADMIN PRODUCT
@@ -2652,8 +2906,13 @@ def update_order_status(order_id):
 
 @app.route('/categories')
 def categories_page():
-    return render_template('categories.html')
 
+    products = get_products()
+
+    return render_template(
+        'categories.html',
+        products=products
+    )
 
 # =========================================================
 # RUN APPLICATION
@@ -2664,4 +2923,3 @@ if __name__ == "__main__":
     app.run(
         debug=True
     )
-

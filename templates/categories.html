@@ -139,6 +139,41 @@
         position: relative;
     }
 
+
+/* CATEGORY PRODUCT IMAGE - UNIFORM LANDSCAPE */
+
+.category-product-image {
+    width: 100%;
+    height: 220px;
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(
+        135deg,
+        #241633,
+        #171020,
+        #2b1940
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.category-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.category-product-image .no-product-image {
+    color: #c4b5d8;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+}
+
+
     /* RESPONSIVE */
 
     @media (max-width: 900px) {

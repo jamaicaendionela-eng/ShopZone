@@ -192,16 +192,47 @@ body {
         0 5px 18px rgba(109, 40, 217, 0.12);
 }
 
-/* PRODUCT IMAGE */
+/* =========================================
+   SHOPZONE PRODUCT IMAGES
+   Uniform Landscape Layout
+========================================= */
 
 .product-image {
+    width: 100%;
     height: 220px;
-    background: linear-gradient(135deg, #241b30, #17121f);
+    aspect-ratio: 4 / 3;
+
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: 90px;
-    border-bottom: 1px solid var(--border);
+    justify-content: center;
+
+    overflow: hidden;
+
+    background: linear-gradient(
+        135deg,
+        #241633,
+        #171020,
+        #2b1940
+    );
+
+    border-radius: 12px;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+    object-position: center;
+
+    display: block;
+}
+
+.no-product-image {
+    color: #c4b5d8;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
 }
 
 /* PRODUCT INFO */
@@ -486,3 +517,35 @@ footer p {
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* =========================================
+   PRODUCT IMAGE - ACTUAL IMAGES
+========================================= */
+
+.product-image {
+    width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 12px;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    padding: 12px;
+}
+
+.no-product-image {
+    color: #888888;
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+}
+
